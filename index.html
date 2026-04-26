@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v5.1 Cloud</title>
+    <title>26 Words. v5.2 Cloud Pro</title>
     <style>
         :root { --n3-color: #2ecc71; --n4-color: #3498db; --n5-color: #f39c12; --other-color: #9b59b6; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
@@ -14,10 +14,23 @@
         .card.is-flipped { transform: rotateY(180deg); }
         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 24px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
         .level-badge { position: absolute; top: 20px; right: 20px; padding: 4px 12px; border-radius: 8px; color: white; font-weight: 800; font-size: 0.8rem; }
+        
+        /* 拼音排版優化：一般字灰色，目標字紅色 */
+        .passage-text { font-size: 1.4rem; line-height: 2.4; font-weight: 500; }
+        ruby { ruby-align: center; }
+        rt { font-size: 0.55em; color: #8e8e93; font-family: monospace; transform: translateY(-2px); }
         .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.08); padding: 2px 4px; border-radius: 4px;}
+        .highlight rt { color: #e74c3c; } /* 目標字的拼音保持紅色 */
+        
         .card-back { background-color: #fafafa; transform: rotateY(180deg); }
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
-        .btn { flex: 1; text-align: center; border-radius: 14px; font-weight: 700; padding: 18px 0; border: none; cursor: pointer;}
+        .btn { flex: 1; text-align: center; border-radius: 14px; font-weight: 700; padding: 18px 0; border: none; cursor: pointer; font-size: 1rem;}
+        
+        /* 全新按鈕配色 */
+        .btn-hard { background-color: #ffeaea; color: #e74c3c; }
+        .btn-good { background-color: #e5e5ea; color: #555; }
+        .btn-easy { background-color: #e2fbe2; color: #2ecc71; }
+        
         .done-screen { display: none; text-align: center; color: #fff; padding: 40px; flex-direction: column; justify-content: center; height: 100%; }
         @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg); opacity: 0; } }
         @keyframes slideInAnim { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -28,32 +41,36 @@
 <div class="app-container">
     <div class="top-bar">
         <span id="ui-counter">讀取中...</span>
-        <span id="ui-status" style="color: #2ecc71;">● 雲端連線中</span>
+        <span id="ui-status" style="color: #2ecc71;">● 雲端連線中 v5.2</span>
     </div>
 
     <div class="card-wrapper" id="card-area">
         <div class="card" id="flashcard" onclick="this.classList.toggle('is-flipped')">
             <div class="card-face card-front">
                 <div class="level-badge" id="ui-level-front"></div>
-                <div class="passage-text" id="ui-passage-jp" style="font-size: 1.4rem; line-height: 2.2;"></div>
+                <div class="passage-text" id="ui-passage-jp"></div>
+                <div style="margin-top: auto; text-align: center; color: #8e8e93; font-size: 0.8rem;">點擊翻面 🔄</div>
             </div>
             <div class="card-face card-back">
                 <div class="level-badge" id="ui-level-back"></div>
-                <div id="ui-word" style="font-size: 2.2rem; font-weight: 800;"></div>
+                <div style="position: absolute; right: 0; top: 40px; font-size: 2rem; cursor: pointer; opacity: 0.8;" onclick="speakWord(event)">🔊</div>
+                <div id="ui-word" style="font-size: 2.2rem; font-weight: 800; margin-top: 10px;"></div>
                 <div id="ui-kana" style="color: #8e8e93;"></div>
                 <div id="ui-meaning" style="color: #2ecc71; font-weight: bold; margin-top: 10px;"></div>
-                <div style="margin-top: 20px; background: #f2f2f7; padding: 15px; border-radius: 12px; flex: 1;" id="ui-passage-tw"></div>
+                <div style="margin-top: 20px; background: #f2f2f7; padding: 15px; border-radius: 12px; flex: 1; font-size: 0.95rem; line-height: 1.6; color: #3a3a3c;" id="ui-passage-tw"></div>
                 <div class="btn-group">
-                    <button class="btn" style="background:#ffeaea; color:#e74c3c" onclick="nextCard('again')">再次</button>
-                    <button class="btn" style="background:#e2fbe2; color:#2ecc71" onclick="nextCard('easy')">容易</button>
+                    <button class="btn btn-hard" onclick="nextCard(event, 'hard')">困難</button>
+                    <button class="btn btn-good" onclick="nextCard(event, 'good')">剛好</button>
+                    <button class="btn btn-easy" onclick="nextCard(event, 'easy')">簡單</button>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="done-screen" id="done-screen">
-        <h2>🎉 任務完成</h2>
-        <button class="btn" style="background:#333; color:white; width:100%" onclick="location.reload()">再來 10 個</button>
+        <div style="font-size: 4rem;">🏆</div>
+        <h2 style="color: #2ecc71;">今日目標達成</h2>
+        <button class="btn btn-good" style="margin-top:20px; background:#333; color:white; width:100%" onclick="location.reload()">再來 10 個</button>
     </div>
 </div>
 
@@ -63,21 +80,25 @@
 
     let allWords = [];
     let todaysDeck = [];
-    const STORAGE_KEY = '26words_cloud_data';
+    let isAnimating = false; // 終極防卡死鎖
+    const STORAGE_KEY = '26words_cloud_v5';
     let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
     async function fetchData() {
         try {
             const response = await fetch(SHEET_CSV_URL);
             const data = await response.text();
-            const rows = data.split('\n').slice(1); // 跳過標題列
+            const rows = data.split('\n').slice(1);
             allWords = rows.map(row => {
-                const cols = row.split(',');
+                // 處理 CSV 格式中可能包含逗號的字串
+                const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
+                const cols = row.split(regex).map(col => col.replace(/^"|"$/g, '').trim());
                 return { id: cols[0], level: cols[1], theme: cols[2], word: cols[3], kana: cols[4], romaji: cols[5], meaning: cols[6], passage_jp: cols[7], passage_tw: cols[8] };
             }).filter(w => w.id);
             initBatch();
         } catch (e) {
             document.getElementById('ui-counter').innerText = "連線失敗";
+            document.getElementById('ui-status').style.color = "#e74c3c";
         }
     }
 
@@ -93,31 +114,69 @@
         const cur = todaysDeck[0];
         document.getElementById('ui-counter').innerText = `剩餘 ${todaysDeck.length}`;
         document.getElementById('ui-level-front').innerText = cur.level;
-        document.getElementById('ui-level-front').style.background = `var(--${cur.level.toLowerCase()}-color)`;
+        document.getElementById('ui-level-front').style.background = `var(--${(cur.level || 'other').toLowerCase()}-color)`;
         document.getElementById('ui-passage-jp').innerHTML = cur.passage_jp;
+        
+        document.getElementById('ui-level-back').innerText = cur.level;
+        document.getElementById('ui-level-back').style.background = `var(--${(cur.level || 'other').toLowerCase()}-color)`;
         document.getElementById('ui-word').innerText = cur.word;
         document.getElementById('ui-kana').innerText = `${cur.kana} (${cur.romaji})`;
         document.getElementById('ui-meaning').innerText = cur.meaning;
         document.getElementById('ui-passage-tw').innerText = cur.passage_tw;
-        document.getElementById('flashcard').classList.remove('is-flipped');
-    }
-
-    function nextCard(status) {
-        const cur = todaysDeck.shift();
-        if (status === 'easy') {
-            learningData[cur.id] = { nextReview: Date.now() + 86400000 };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
-        } else {
-            todaysDeck.push(cur);
-        }
         
         const card = document.getElementById('flashcard');
+        card.classList.remove('is-flipped');
+    }
+
+    function speakWord(e) {
+        e.stopPropagation();
+        const u = new SpeechSynthesisUtterance(todaysDeck[0].word);
+        u.lang = 'ja-JP'; window.speechSynthesis.speak(u);
+    }
+
+    function nextCard(e, status) {
+        e.stopPropagation();
+        if (isAnimating) return; // 動畫鎖，防止狂按
+        isAnimating = true;
+
+        const cur = todaysDeck.shift();
+        let record = learningData[cur.id] || { interval: 0 };
+        const now = Date.now();
+        const ONE_DAY = 86400000;
+
+        if (status === 'hard') {
+            record.interval = Math.max(0.5, (record.interval || 1) * 0.5);
+            todaysDeck.push(cur); // 困難：塞回牌組最後面，今天還要再看一次
+        } else if (status === 'good') {
+            record.interval = Math.max(1, (record.interval || 1) * 1.5);
+            record.nextReview = now + (record.interval * ONE_DAY);
+        } else if (status === 'easy') {
+            record.interval = Math.max(2, (record.interval || 1) * 2.5);
+            record.nextReview = now + (record.interval * ONE_DAY);
+        }
+
+        learningData[cur.id] = record;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
+
+        const card = document.getElementById('flashcard');
+        card.style.transition = 'none';
         card.style.animation = 'slideOutAnim 0.4s forwards';
+
         setTimeout(() => {
             if (todaysDeck.length > 0) {
                 renderCard();
+                card.style.animation = 'none';
+                void card.offsetWidth; // 強制瀏覽器重繪
                 card.style.animation = 'slideInAnim 0.4s forwards';
-            } else showDone();
+                setTimeout(() => {
+                    card.style.transition = 'transform 0.6s';
+                    card.style.animation = '';
+                    isAnimating = false;
+                }, 400);
+            } else {
+                showDone();
+                isAnimating = false;
+            }
         }, 400);
     }
 
