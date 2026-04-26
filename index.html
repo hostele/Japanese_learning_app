@@ -3,64 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 日文學習 - Reels模式</title>
+    <title>26 Words. v1.1</title>
     <style>
-        /* 深色背景與全螢幕設定 */
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        
-        /* App 核心容器 - 模擬手機螢幕比例 */
         .app-container { background-color: #121212; width: 100%; max-width: 400px; height: 100%; max-height: 850px; position: relative; display: flex; flex-direction: column; overflow: hidden;}
-        
-        /* 頂部極簡導覽 */
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; z-index: 10; font-size: 0.9rem; font-weight: 600; color: #8e8e93; }
         .theme-badge { background-color: #333; padding: 5px 12px; border-radius: 15px; color: #fff; font-size: 0.8rem;}
-
-        /* 卡片容器 */
         .card-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 20px 40px 20px; perspective: 1000px; }
-        
-        /* 翻轉卡片本體 */
         .card { width: 100%; height: 100%; max-height: 550px; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s; transform-style: preserve-3d; cursor: pointer; color: #1c1c1e; }
-        
-        /* 卡片正反面共用設定 */
         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
-        
-        /* 卡片正面：閱讀短文 */
         .card-front { background-color: #ffffff; justify-content: center; }
         .passage-text { font-size: 1.4rem; line-height: 1.8; font-weight: 500; }
         .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.1); padding: 0 4px; border-radius: 4px;}
-        .tap-hint { margin-top: auto; text-align: center; color: #8e8e93; font-size: 0.9rem; animation: pulse 2s infinite; }
-
-        /* 卡片背面：單字解析 */
+        .tap-hint { margin-top: auto; text-align: center; color: #8e8e93; font-size: 0.8rem; animation: pulse 2s infinite; }
         .card-back { background-color: #fafafa; transform: rotateY(180deg); }
-        .word-header { margin-bottom: 20px; border-bottom: 1px solid #e5e5ea; padding-bottom: 20px;}
-        .word-kanji { font-size: 2.5rem; font-weight: 800; margin: 0 0 5px 0;}
-        .word-kana { font-size: 1.1rem; color: #8e8e93; margin: 0 0 10px 0;}
+        .word-header { margin-bottom: 15px; border-bottom: 1px solid #e5e5ea; padding-bottom: 15px; position: relative;}
+        .word-kanji { font-size: 2.2rem; font-weight: 800; margin: 0;}
+        .word-romaji { font-size: 0.9rem; color: #8e8e93; font-family: monospace; text-transform: lowercase; margin-bottom: 5px; }
+        .word-kana { font-size: 1.1rem; color: #555; margin: 0 0 5px 0;}
         .word-meaning { font-size: 1.2rem; font-weight: 600; color: #2ecc71; margin: 0;}
-        
-        .translation-box { background-color: #f2f2f7; padding: 15px; border-radius: 12px; margin-bottom: 20px; flex: 1;}
+        .audio-btn { position: absolute; right: 0; top: 10px; font-size: 1.5rem; cursor: pointer; color: #1c1c1e; opacity: 0.6; }
+        .translation-box { background-color: #f2f2f7; padding: 15px; border-radius: 12px; margin-bottom: 15px; flex: 1; overflow-y: auto;}
         .translation-label { font-size: 0.8rem; color: #8e8e93; margin-bottom: 8px; font-weight: 600;}
-        .translation-text { font-size: 1rem; line-height: 1.6; color: #3a3a3c;}
-
-        /* 背面：複習按鈕群組 */
+        .translation-text { font-size: 0.95rem; line-height: 1.6; color: #3a3a3c;}
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
         .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 600; cursor: pointer; padding: 16px 0; font-size: 1rem; border: none; transition: 0.2s;}
         .btn-forget { background-color: #ffeaea; color: #e74c3c; }
         .btn-vague { background-color: #e5e5ea; color: #8e8e93; }
         .btn-familiar { background-color: #e2fbe2; color: #2ecc71; }
-
-        /* 動畫特效 */
         .card.is-flipped { transform: rotateY(180deg); }
         .card.slide-up-out { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; }
         .card.slide-up-in { transform: translateY(100%) scale(0.9); opacity: 0; animation: slideIn 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards; }
-        
-        @keyframes slideIn {
-            to { transform: translateY(0) scale(1); opacity: 1; }
-        }
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            50% { opacity: 1; }
-            100% { opacity: 0.5; }
-        }
+        @keyframes slideIn { to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -68,131 +43,126 @@
 <div class="app-container">
     <div class="top-bar">
         <span>26 Words.</span>
-        <span class="theme-badge" id="ui-theme-badge">載入中...</span>
+        <span class="theme-badge" id="ui-theme-badge">...</span>
     </div>
 
     <div class="card-wrapper">
         <div class="card" id="flashcard" onclick="flipCard(event)">
-            
             <div class="card-face card-front">
-                <div class="passage-text" id="ui-passage-jp">
-                    </div>
+                <div class="passage-text" id="ui-passage-jp"></div>
                 <div class="tap-hint">點擊卡片看解析</div>
             </div>
-
             <div class="card-face card-back">
                 <div class="word-header">
+                    <div class="audio-btn" onclick="speakWord(event)">🔊</div>
+                    <div class="word-romaji" id="ui-romaji"></div>
                     <h2 class="word-kanji" id="ui-word"></h2>
                     <p class="word-kana" id="ui-kana"></p>
                     <p class="word-meaning" id="ui-meaning"></p>
                 </div>
-                
                 <div class="translation-box">
                     <div class="translation-label">情境翻譯</div>
                     <div class="translation-text" id="ui-passage-tw"></div>
                 </div>
-
                 <div class="btn-group">
                     <button class="btn btn-forget" onclick="nextCard('again')">再次</button>
                     <button class="btn btn-vague" onclick="nextCard('hard')">困難</button>
                     <button class="btn btn-familiar" onclick="nextCard('easy')">容易</button>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <script>
-    // 全新的情境資料庫
     const learningDatabase = [
         {
-            theme: "旅行對話 (購票)",
-            word: "満席",
-            kana: "まんせき",
-            meaning: "客滿 / 滿座",
-            passage_jp: "「すみません、明日のスポーツの試合のチケットを買いたいんですが。」「申し訳ありません、明日はすでに<span class=\"highlight\">満席</span>となっております。」",
-            passage_tw: "「不好意思，我想買明天體育比賽的門票。」「非常抱歉，明天已經客滿了。」"
+            theme: "體育 (球員加油)",
+            word: "応援",
+            kana: "おうえん",
+            romaji: "ou-en",
+            meaning: "加油 / 應援",
+            passage_jp: "大谷選手のホームランを期待して、みんなで一生懸命<span class=\"highlight\">応援</span>しました。",
+            passage_tw: "期待著大谷選手的全壘打，大家一起拚命地為他加油應援。"
         },
         {
-            theme: "日本飲食 (傳統)",
-            word: "独特",
-            kana: "どくとく",
-            meaning: "獨特",
-            passage_jp: "日本の伝統的なすき焼きは、甘辛い味付けが<span class=\"highlight\">独特</span>です。美味しいお肉を卵につけて食べると、本当に幸せな気分になります。食後の抹茶も最高です。",
-            passage_tw: "日本傳統的壽喜燒，鹹甜的調味非常獨特。將美味的肉片沾上生蛋液食用，真的會感到非常幸福。飯後的抹茶也是最棒的。"
+            theme: "賽車 (速度感)",
+            word: "速度",
+            kana: "そくど",
+            romaji: "soku-do",
+            meaning: "速度",
+            passage_jp: "F1マシンの<span class=\"highlight\">速度</span>は本当に速いです。コーナーを曲がる技術に驚きました。",
+            passage_tw: "F1賽車的速度真的很快。轉彎的技術讓人驚嘆。"
         },
         {
-            theme: "娛樂 (動畫電影)",
-            word: "夢中",
-            kana: "むちゅう",
-            meaning: "著迷 / 熱衷",
-            passage_jp: "そのアニメ映画の監督は、子供の頃のおもちゃの世界を見事に描きました。観客は皆、ストーリーに<span class=\"highlight\">夢中</span>になり、上映後は大きな拍手が起こりました。",
-            passage_tw: "那部動畫電影的導演，出色地描繪了童年時期的玩具世界。觀眾們都對故事情節著迷，播映結束後響起了熱烈的掌聲。"
+            theme: "電影 (動畫感動)",
+            word: "感動",
+            kana: "かんどう",
+            romaji: "kan-dou",
+            meaning: "感動",
+            passage_jp: "子供の頃に見たおもちゃの映画を思い出して、とても<span class=\"highlight\">感動</span>しました。",
+            passage_tw: "回想起小時候看過的玩具電影，感到非常感動。"
         },
         {
-            theme: "旅行對話 (租借)",
-            word: "手続き",
-            kana: "てづづき",
-            meaning: "手續 / 流程",
-            passage_jp: "「レンタカーの<span class=\"highlight\">手続き</span>をお願いします。アプリで予約しました。」「はい、承知いたしました。こちらのタブレットで免許証の確認をお願いします。」",
-            passage_tw: "「麻煩幫我辦理租借汽車的手續。我已經用 App 預約了。」「好的，沒問題。請用這邊的平板電腦確認您的駕照。」"
+            theme: "旅行 (行程安排)",
+            word: "予約",
+            kana: "よやく",
+            romaji: "yo-yaku",
+            meaning: "預約 / 訂位",
+            passage_jp: "台南の人気なレストランを<span class=\"highlight\">予約</span>しておきました。楽しみですね。",
+            passage_tw: "我已經預約好了台南的人氣餐廳。真令人期待。"
         },
         {
-            theme: "懷舊美學",
-            word: "迷う",
-            kana: "まよう",
-            meaning: "迷失 / 猶豫",
-            passage_jp: "終わりのない黄色い壁の空間に<span class=\"highlight\">迷い</span>込んだような気がしました。怖いというより、どこか懐かしい不思議な感覚です。",
-            passage_tw: "感覺像是迷失在一個只有黃色牆壁且沒有盡頭的空間裡。與其說害怕，不如說是一種帶點懷舊的不可思議感。"
+            theme: "文化 (獨特氛圍)",
+            word: "雰囲気",
+            kana: "ふんいき",
+            romaji: "fun-iki",
+            meaning: "氣氛 / 氛圍",
+            passage_jp: "この古いモールの<span class=\"highlight\">雰囲気</span>は、どこか懐かしい感じがしますね。",
+            passage_tw: "這個舊商場的氛圍，總覺得有種令人懷念的感覺。"
         }
     ];
 
     let currentIndex = 0;
     const cardElement = document.getElementById('flashcard');
 
-    // 載入卡片資料
     function loadCardData(index) {
         const data = learningDatabase[index];
         document.getElementById('ui-theme-badge').innerText = data.theme;
         document.getElementById('ui-passage-jp').innerHTML = data.passage_jp;
         document.getElementById('ui-word').innerText = data.word;
         document.getElementById('ui-kana').innerText = data.kana;
+        document.getElementById('ui-romaji').innerText = data.romaji;
         document.getElementById('ui-meaning').innerText = data.meaning;
         document.getElementById('ui-passage-tw').innerText = data.passage_tw;
         
-        // 確保卡片狀態是正面，並移除滑入動畫class
         cardElement.classList.remove('is-flipped', 'slide-up-in', 'slide-up-out');
     }
 
-    // 點擊翻卡
     function flipCard(event) {
-        // 如果點擊的是按鈕，不要觸發翻卡
-        if(event.target.tagName.toLowerCase() === 'button') return;
+        if(event.target.tagName.toLowerCase() === 'button' || event.target.classList.contains('audio-btn')) return;
         cardElement.classList.toggle('is-flipped');
     }
 
-    // 點擊記憶按鈕，載入下一張 (Reels 滑動特效)
-    function nextCard(status) {
-        console.log(`單字: ${learningDatabase[currentIndex].word}, 記憶狀態: ${status}`);
-        
-        // 1. 卡片往上滑出的特效
-        cardElement.classList.add('slide-up-out');
-        
-        setTimeout(() => {
-            // 2. 準備下一筆資料 (如果到底了就從頭開始，模擬無限流)
-            currentIndex = (currentIndex + 1) % learningDatabase.length;
-            loadCardData(currentIndex);
-            
-            // 3. 卡片從下方滑入的特效
-            cardElement.classList.add('slide-up-in');
-        }, 400); // 等待滑出動畫完成
+    function speakWord(event) {
+        event.stopPropagation();
+        const word = learningDatabase[currentIndex].word;
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 0.8; 
+        window.speechSynthesis.speak(utterance);
     }
 
-    // 程式啟動時載入第一張卡片
-    window.onload = () => {
-        loadCardData(0);
-    };
+    function nextCard(status) {
+        cardElement.classList.add('slide-up-out');
+        setTimeout(() => {
+            currentIndex = (currentIndex + 1) % learningDatabase.length;
+            loadCardData(currentIndex);
+            cardElement.classList.add('slide-up-in');
+        }, 400);
+    }
+
+    window.onload = () => loadCardData(0);
 </script>
 
 </body>
