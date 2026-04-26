@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v1.1</title>
+    <title>26 Words. v2.0</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .app-container { background-color: #121212; width: 100%; max-width: 400px; height: 100%; max-height: 850px; position: relative; display: flex; flex-direction: column; overflow: hidden;}
@@ -12,10 +12,12 @@
         .card-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 20px 40px 20px; perspective: 1000px; }
         .card { width: 100%; height: 100%; max-height: 550px; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s; transform-style: preserve-3d; cursor: pointer; color: #1c1c1e; }
         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
+        
         .card-front { background-color: #ffffff; justify-content: center; }
         .passage-text { font-size: 1.4rem; line-height: 1.8; font-weight: 500; }
         .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.1); padding: 0 4px; border-radius: 4px;}
         .tap-hint { margin-top: auto; text-align: center; color: #8e8e93; font-size: 0.8rem; animation: pulse 2s infinite; }
+        
         .card-back { background-color: #fafafa; transform: rotateY(180deg); }
         .word-header { margin-bottom: 15px; border-bottom: 1px solid #e5e5ea; padding-bottom: 15px; position: relative;}
         .word-kanji { font-size: 2.2rem; font-weight: 800; margin: 0;}
@@ -23,17 +25,25 @@
         .word-kana { font-size: 1.1rem; color: #555; margin: 0 0 5px 0;}
         .word-meaning { font-size: 1.2rem; font-weight: 600; color: #2ecc71; margin: 0;}
         .audio-btn { position: absolute; right: 0; top: 10px; font-size: 1.5rem; cursor: pointer; color: #1c1c1e; opacity: 0.6; }
+        
         .translation-box { background-color: #f2f2f7; padding: 15px; border-radius: 12px; margin-bottom: 15px; flex: 1; overflow-y: auto;}
         .translation-label { font-size: 0.8rem; color: #8e8e93; margin-bottom: 8px; font-weight: 600;}
         .translation-text { font-size: 0.95rem; line-height: 1.6; color: #3a3a3c;}
+        
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
         .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 600; cursor: pointer; padding: 16px 0; font-size: 1rem; border: none; transition: 0.2s;}
         .btn-forget { background-color: #ffeaea; color: #e74c3c; }
         .btn-vague { background-color: #e5e5ea; color: #8e8e93; }
         .btn-familiar { background-color: #e2fbe2; color: #2ecc71; }
+        
         .card.is-flipped { transform: rotateY(180deg); }
         .card.slide-up-out { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; }
         .card.slide-up-in { transform: translateY(100%) scale(0.9); opacity: 0; animation: slideIn 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards; }
+        
+        .done-screen { display: none; text-align: center; color: #fff; padding: 40px; flex-direction: column; justify-content: center; height: 100%; }
+        .done-title { font-size: 2rem; margin-bottom: 10px; color: #2ecc71; }
+        .done-text { color: #8e8e93; line-height: 1.6; }
+
         @keyframes slideIn { to { transform: translateY(0) scale(1); opacity: 1; } }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
@@ -43,10 +53,10 @@
 <div class="app-container">
     <div class="top-bar">
         <span>26 Words.</span>
-        <span class="theme-badge" id="ui-theme-badge">...</span>
+        <span class="theme-badge" id="ui-theme-badge">計算中...</span>
     </div>
 
-    <div class="card-wrapper">
+    <div class="card-wrapper" id="card-area">
         <div class="card" id="flashcard" onclick="flipCard(event)">
             <div class="card-face card-front">
                 <div class="passage-text" id="ui-passage-jp"></div>
@@ -72,97 +82,136 @@
             </div>
         </div>
     </div>
+
+    <div class="done-screen" id="done-screen">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
+        <h2 class="done-title">今日任務完成</h2>
+        <p class="done-text">你已經複習完今天所有的單字了！<br>大腦需要休息，明天再來吧。</p>
+        <button class="btn btn-familiar" style="margin-top: 30px; background-color: #333; color: white;" onclick="location.reload()">重新整理</button>
+    </div>
 </div>
 
 <script>
-    const learningDatabase = [
-        {
-            theme: "體育 (球員加油)",
-            word: "応援",
-            kana: "おうえん",
-            romaji: "ou-en",
-            meaning: "加油 / 應援",
-            passage_jp: "大谷選手のホームランを期待して、みんなで一生懸命<span class=\"highlight\">応援</span>しました。",
-            passage_tw: "期待著大谷選手的全壘打，大家一起拚命地為他加油應援。"
-        },
-        {
-            theme: "賽車 (速度感)",
-            word: "速度",
-            kana: "そくど",
-            romaji: "soku-do",
-            meaning: "速度",
-            passage_jp: "F1マシンの<span class=\"highlight\">速度</span>は本当に速いです。コーナーを曲がる技術に驚きました。",
-            passage_tw: "F1賽車的速度真的很快。轉彎的技術讓人驚嘆。"
-        },
-        {
-            theme: "電影 (動畫感動)",
-            word: "感動",
-            kana: "かんどう",
-            romaji: "kan-dou",
-            meaning: "感動",
-            passage_jp: "子供の頃に見たおもちゃの映画を思い出して、とても<span class=\"highlight\">感動</span>しました。",
-            passage_tw: "回想起小時候看過的玩具電影，感到非常感動。"
-        },
-        {
-            theme: "旅行 (行程安排)",
-            word: "予約",
-            kana: "よやく",
-            romaji: "yo-yaku",
-            meaning: "預約 / 訂位",
-            passage_jp: "台南の人気なレストランを<span class=\"highlight\">予約</span>しておきました。楽しみですね。",
-            passage_tw: "我已經預約好了台南的人氣餐廳。真令人期待。"
-        },
-        {
-            theme: "文化 (獨特氛圍)",
-            word: "雰囲気",
-            kana: "ふんいき",
-            romaji: "fun-iki",
-            meaning: "氣氛 / 氛圍",
-            passage_jp: "この古いモールの<span class=\"highlight\">雰囲気</span>は、どこか懐かしい感じがしますね。",
-            passage_tw: "這個舊商場的氛圍，總覺得有種令人懷念的感覺。"
-        }
+    // 增加 ID 以利於追蹤學習紀錄
+    const rawDatabase = [
+        { id: "w1", theme: "體育 (球員加油)", word: "応援", kana: "おうえん", romaji: "ou-en", meaning: "加油 / 應援", passage_jp: "大谷選手のホームランを期待して、みんなで一生懸命<span class=\"highlight\">応援</span>しました。", passage_tw: "期待著大谷選手的全壘打，大家一起拚命地為他加油應援。" },
+        { id: "w2", theme: "賽車 (速度感)", word: "速度", kana: "そくど", romaji: "soku-do", meaning: "速度", passage_jp: "F1マシンの<span class=\"highlight\">速度</span>は本当に速いです。コーナーを曲がる技術に驚きました。", passage_tw: "F1賽車的速度真的很快。轉彎的技術讓人驚嘆。" },
+        { id: "w3", theme: "電影 (動畫感動)", word: "感動", kana: "かんどう", romaji: "kan-dou", meaning: "感動", passage_jp: "子供の頃に見たおもちゃの映画を思い出して、とても<span class=\"highlight\">感動</span>しました。", passage_tw: "回想起小時候看過的玩具電影，感到非常感動。" },
+        { id: "w4", theme: "旅行 (行程安排)", word: "予約", kana: "よやく", romaji: "yo-yaku", meaning: "預約 / 訂位", passage_jp: "台南の人気なレストランを<span class=\"highlight\">予約</span>しておきました。楽しみですね。", passage_tw: "我已經預約好了台南的人氣餐廳。真令人期待。" },
+        { id: "w5", theme: "文化 (獨特氛圍)", word: "雰囲気", kana: "ふんいき", romaji: "fun-iki", meaning: "氣氛 / 氛圍", passage_jp: "この古いモールの<span class=\"highlight\">雰囲気</span>は、どこか懐かしい感じがしますね。", passage_tw: "這個舊商場的氛圍，總覺得有種令人懷念的感覺。" }
     ];
 
-    let currentIndex = 0;
+    const STORAGE_KEY = '26words_learning_data';
+    let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    let todaysDeck = [];
     const cardElement = document.getElementById('flashcard');
 
-    function loadCardData(index) {
-        const data = learningDatabase[index];
-        document.getElementById('ui-theme-badge').innerText = data.theme;
-        document.getElementById('ui-passage-jp').innerHTML = data.passage_jp;
-        document.getElementById('ui-word').innerText = data.word;
-        document.getElementById('ui-kana').innerText = data.kana;
-        document.getElementById('ui-romaji').innerText = data.romaji;
-        document.getElementById('ui-meaning').innerText = data.meaning;
-        document.getElementById('ui-passage-tw').innerText = data.passage_tw;
+    // 1. 初始化今日牌組 (篩選出需要複習的單字)
+    function initDeck() {
+        const now = new Date().getTime();
+        todaysDeck = [];
+
+        rawDatabase.forEach(wordObj => {
+            const record = learningData[wordObj.id];
+            // 如果沒學過，或是複習時間已經到了，就加入今天的牌組
+            if (!record || record.nextReview <= now) {
+                todaysDeck.push(wordObj);
+            }
+        });
+
+        // 打亂牌組順序，增加新鮮感
+        todaysDeck.sort(() => Math.random() - 0.5);
+
+        if (todaysDeck.length > 0) {
+            loadCardData();
+        } else {
+            showDoneScreen();
+        }
+    }
+
+    // 2. 載入卡片資料
+    function loadCardData() {
+        if (todaysDeck.length === 0) {
+            showDoneScreen();
+            return;
+        }
+        
+        const currentWord = todaysDeck[0];
+        document.getElementById('ui-theme-badge').innerText = `剩餘 ${todaysDeck.length} 詞`;
+        document.getElementById('ui-passage-jp').innerHTML = currentWord.passage_jp;
+        document.getElementById('ui-word').innerText = currentWord.word;
+        document.getElementById('ui-kana').innerText = currentWord.kana;
+        document.getElementById('ui-romaji').innerText = currentWord.romaji;
+        document.getElementById('ui-meaning').innerText = currentWord.meaning;
+        document.getElementById('ui-passage-tw').innerText = currentWord.passage_tw;
         
         cardElement.classList.remove('is-flipped', 'slide-up-in', 'slide-up-out');
     }
 
+    // 3. 翻卡邏輯
     function flipCard(event) {
         if(event.target.tagName.toLowerCase() === 'button' || event.target.classList.contains('audio-btn')) return;
         cardElement.classList.toggle('is-flipped');
     }
 
+    // 4. 發音邏輯
     function speakWord(event) {
         event.stopPropagation();
-        const word = learningDatabase[currentIndex].word;
+        const word = todaysDeck[0].word;
         const utterance = new SpeechSynthesisUtterance(word);
         utterance.lang = 'ja-JP';
         utterance.rate = 0.8; 
         window.speechSynthesis.speak(utterance);
     }
 
+    // 5. 記憶曲線演算法與換卡邏輯
     function nextCard(status) {
+        const currentWord = todaysDeck[0];
+        const record = learningData[currentWord.id] || { interval: 0, nextReview: 0 };
+        const now = new Date().getTime();
+        const ONE_DAY = 24 * 60 * 60 * 1000;
+
+        // 計算下次複習時間
+        if (status === 'again') {
+            // 忘記了：間隔歸零，今天稍後還要再考一次
+            record.interval = 0;
+            record.nextReview = now + (5 * 60 * 1000); // 5分鐘後可再次出現
+            todaysDeck.push(todaysDeck.shift()); // 把它塞到牌組最後面
+        } else {
+            if (status === 'hard') {
+                // 困難：明天再看一次
+                record.interval = Math.max(1, record.interval * 1.2);
+            } else if (status === 'easy') {
+                // 容易：間隔拉長 (例如原本 1天 變 2.5天)
+                record.interval = Math.max(1, record.interval * 2.5);
+            }
+            record.nextReview = now + (record.interval * ONE_DAY);
+            todaysDeck.shift(); // 從今天的牌組中徹底移除
+        }
+
+        // 存檔到本機瀏覽器
+        learningData[currentWord.id] = record;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
+
+        // 動畫特效與換下一張
         cardElement.classList.add('slide-up-out');
         setTimeout(() => {
-            currentIndex = (currentIndex + 1) % learningDatabase.length;
-            loadCardData(currentIndex);
-            cardElement.classList.add('slide-up-in');
+            loadCardData();
+            if (todaysDeck.length > 0) {
+                cardElement.classList.add('slide-up-in');
+            }
         }, 400);
     }
 
-    window.onload = () => loadCardData(0);
+    // 6. 顯示完課畫面
+    function showDoneScreen() {
+        document.getElementById('card-area').style.display = 'none';
+        document.getElementById('ui-theme-badge').innerText = 'All Clear!';
+        document.getElementById('done-screen').style.display = 'flex';
+    }
+
+    // 程式啟動
+    window.onload = () => initDeck();
 </script>
 
 </body>
