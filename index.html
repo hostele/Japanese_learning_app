@@ -3,231 +3,130 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v5.0 - Pro Mode</title>
+    <title>26 Words. v5.1 Cloud</title>
     <style>
         :root { --n3-color: #2ecc71; --n4-color: #3498db; --n5-color: #f39c12; --other-color: #9b59b6; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .app-container { background-color: #121212; width: 100%; max-width: 400px; height: 100%; max-height: 850px; position: relative; display: flex; flex-direction: column; overflow: hidden;}
-        
-        /* 導覽列 */
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; z-index: 10; font-size: 0.85rem; font-weight: 600; color: #8e8e93; border-bottom: 1px solid #222;}
-        .mode-toggle { background: #333; padding: 4px 10px; border-radius: 10px; cursor: pointer; color: #fff; }
-        
-        /* 卡片系統 */
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; font-size: 0.85rem; border-bottom: 1px solid #222;}
         .card-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; perspective: 1000px; }
-        .card { width: 100%; height: 100%; max-height: 600px; background-color: #ffffff; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; color: #1c1c1e; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); cursor: pointer; }
+        .card { width: 100%; height: 100%; max-height: 600px; background-color: #ffffff; border-radius: 24px; position: relative; color: #1c1c1e; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
         .card.is-flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 24px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
-        
-        /* 標籤 */
-        .level-badge { position: absolute; top: 20px; right: 20px; padding: 4px 12px; border-radius: 8px; color: white; font-weight: 800; font-size: 0.8rem; z-index: 5; }
-
-        /* 正面 */
-        .card-front { background-color: #ffffff; justify-content: center; }
-        .passage-text { font-size: 1.35rem; line-height: 2.2; font-weight: 500; }
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 24px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .level-badge { position: absolute; top: 20px; right: 20px; padding: 4px 12px; border-radius: 8px; color: white; font-weight: 800; font-size: 0.8rem; }
         .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.08); padding: 2px 4px; border-radius: 4px;}
-        ruby { ruby-align: center; }
-        rt { font-size: 0.55em; color: #e74c3c; font-family: monospace; transform: translateY(-3px); }
-        .tap-hint { margin-top: auto; text-align: center; color: #8e8e93; font-size: 0.8rem; animation: pulse 2s infinite; }
-        
-        /* 背面 */
         .card-back { background-color: #fafafa; transform: rotateY(180deg); }
-        .word-header { margin-bottom: 15px; border-bottom: 1px solid #e5e5ea; padding-bottom: 15px; position: relative;}
-        .word-kanji { font-size: 2.2rem; font-weight: 800; margin: 0;}
-        .audio-btn { position: absolute; right: 0; top: 35px; font-size: 2rem; cursor: pointer; opacity: 0.8;}
-        .translation-box { background-color: #f2f2f7; padding: 15px; border-radius: 12px; margin-bottom: 15px; flex: 1; overflow-y: auto;}
-        
-        /* 按鈕群組 */
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
-        .btn { flex: 1; text-align: center; border-radius: 14px; font-weight: 700; cursor: pointer; padding: 18px 0; font-size: 0.95rem; border: none; transition: 0.2s;}
-        .btn-again { background-color: #ffeaea; color: #e74c3c; }
-        .btn-hard { background-color: #f2f2f7; color: #8e8e93; }
-        .btn-easy { background-color: #e2fbe2; color: #2ecc71; }
-        
-        /* 文章模式專用 */
-        .article-mode-content { display: none; padding: 25px; height: 100%; overflow-y: auto; background: #fff; color: #1c1c1e; border-radius: 24px; }
-        .article-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: #121212; }
-        .article-body { font-size: 1.15rem; line-height: 2; }
-
-        /* 完成畫面 */
+        .btn { flex: 1; text-align: center; border-radius: 14px; font-weight: 700; padding: 18px 0; border: none; cursor: pointer;}
         .done-screen { display: none; text-align: center; color: #fff; padding: 40px; flex-direction: column; justify-content: center; height: 100%; }
-        .action-btns { display: flex; flex-direction: column; gap: 15px; width: 100%; margin-top: 30px; }
-        .btn-action { background: #333; color: white; padding: 20px; border-radius: 15px; font-size: 1.1rem; border: none; cursor: pointer;}
-        .btn-primary { background: #2ecc71; }
-
-        @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; } }
-        @keyframes slideInAnim { from { transform: translateY(100%) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg); opacity: 0; } }
+        @keyframes slideInAnim { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="app-container">
     <div class="top-bar">
-        <span id="ui-counter">1 / 10</span>
-        <span class="mode-toggle" onclick="toggleMode()">切換文章模式</span>
-        <span id="ui-batch-status">批次中</span>
+        <span id="ui-counter">讀取中...</span>
+        <span id="ui-status" style="color: #2ecc71;">● 雲端連線中</span>
     </div>
 
     <div class="card-wrapper" id="card-area">
-        <div class="card" id="flashcard" onclick="flipCard(event)">
+        <div class="card" id="flashcard" onclick="this.classList.toggle('is-flipped')">
             <div class="card-face card-front">
                 <div class="level-badge" id="ui-level-front"></div>
-                <div class="passage-text" id="ui-passage-jp"></div>
-                <div class="tap-hint">點擊翻面 🔄</div>
+                <div class="passage-text" id="ui-passage-jp" style="font-size: 1.4rem; line-height: 2.2;"></div>
             </div>
             <div class="card-face card-back">
                 <div class="level-badge" id="ui-level-back"></div>
-                <div class="word-header">
-                    <div class="audio-btn" onclick="speakWord(event)">🔊</div>
-                    <div class="word-romaji" id="ui-romaji" style="font-size: 0.9rem; color: #8e8e93;"></div>
-                    <h2 class="word-kanji" id="ui-word"></h2>
-                    <p class="word-kana" id="ui-kana" style="margin: 5px 0; color: #555;"></p>
-                    <p class="word-meaning" id="ui-meaning" style="font-weight: bold; color: #2ecc71;"></p>
-                </div>
-                <div class="translation-box">
-                    <div class="translation-label" style="font-size: 0.7rem; color: #aaa;">情境翻譯</div>
-                    <div class="translation-text" id="ui-passage-tw"></div>
-                </div>
+                <div id="ui-word" style="font-size: 2.2rem; font-weight: 800;"></div>
+                <div id="ui-kana" style="color: #8e8e93;"></div>
+                <div id="ui-meaning" style="color: #2ecc71; font-weight: bold; margin-top: 10px;"></div>
+                <div style="margin-top: 20px; background: #f2f2f7; padding: 15px; border-radius: 12px; flex: 1;" id="ui-passage-tw"></div>
                 <div class="btn-group">
-                    <button class="btn btn-again" onclick="nextCard('again')">再次</button>
-                    <button class="btn btn-hard" onclick="nextCard('hard')">困難</button>
-                    <button class="btn btn-easy" onclick="nextCard('easy')">容易</button>
+                    <button class="btn" style="background:#ffeaea; color:#e74c3c" onclick="nextCard('again')">再次</button>
+                    <button class="btn" style="background:#e2fbe2; color:#2ecc71" onclick="nextCard('easy')">容易</button>
                 </div>
             </div>
-        </div>
-        
-        <div class="article-mode-content" id="article-area" onclick="toggleMode()">
-            <div class="article-title" id="ui-art-title"></div>
-            <div class="article-body" id="ui-art-body"></div>
-            <div style="margin-top: 30px; text-align: center; color: #888; font-size: 0.8rem;">點擊文章返回卡片模式</div>
         </div>
     </div>
 
     <div class="done-screen" id="done-screen">
-        <div style="font-size: 4rem;">🏆</div>
-        <h2 style="color: #2ecc71;">今日目標達成</h2>
-        <p id="ui-done-msg" style="color: #8e8e93;">你已經完成這一批次的學習！</p>
-        <div class="action-btns">
-            <button class="btn-action btn-primary" onclick="startNewBatch()">再來 10 個</button>
-            <button class="btn-action" onclick="finishSession()">結束學習</button>
-        </div>
+        <h2>🎉 任務完成</h2>
+        <button class="btn" style="background:#333; color:white; width:100%" onclick="location.reload()">再來 10 個</button>
     </div>
 </div>
 
 <script>
-    // 批次資料庫 (包含 N3-N5 [cite: 1, 213, 360])
-    const rawDatabase = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pub?output=csv';
-        { id: "w1", level: "N3", word: "愛情", kana: "あいじょう", romaji: "aijou", meaning: "情感, 愛", passage_jp: "母の<ruby class=\"highlight\">愛情<rt>aijou</rt></ruby>は深いです。", passage_tw: "母親的愛很深厚。" },
-        { id: "w2", level: "N3", word: "憧れる", kana: "あこがれる", romaji: "akogareru", meaning: "嚮往, 憧憬", passage_jp: "日本の生活に<ruby class=\"highlight\">憧れ<rt>akogare</rt></ruby>ています。", passage_tw: "嚮往著日本的生活。" },
-        { id: "w3", level: "N4", word: "挨拶", kana: "あいさつ", romaji: "aisatsu", meaning: "打招呼", passage_jp: "朝の<ruby class=\"highlight\">挨拶<rt>aisatsu</rt></ruby>は大切です。", passage_tw: "早上的打招呼很重要。" },
-        { id: "w4", level: "N4", word: "一生懸命", kana: "いっしょうけんめい", romaji: "isshoukenmei", meaning: "拼命努力", passage_jp: "<ruby class=\"highlight\">一生懸命<rt>isshoukenmei</rt></ruby>勉強します。", passage_tw: "拼命努力地學習。" },
-        { id: "w5", level: "N5", word: "新しい", kana: "あたらしい", romaji: "atarashii", meaning: "新的", passage_jp: "<ruby class=\"highlight\">新<rt>atara</rt></ruby>しい靴を買いました。", passage_tw: "買了新鞋子。" },
-        { id: "w6", level: "N5", word: "散歩", kana: "さんぽ", romaji: "sampo", meaning: "散步", passage_jp: "公園を<ruby class=\"highlight\">散歩<rt>sampo</rt></ruby>します。", passage_tw: "在公園散步。" },
-        // ... 此處可擴充更多單字
-    ];
+    // 【在這裡貼上你的 Google Sheets CSV 網址】
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pub?output=csv'; 
 
-    // 文章模式資料
-    const articleDatabase = [
-        {
-            title: "台南之旅的期待 [cite: 109]",
-            body: "週末に台南へ旅行に行きます。台南は美味しい食べ物が<ruby class=\"highlight\">豊富<rt>houfu</rt></ruby>で、特に夜市が楽しみです。人気のレストランを<ruby class=\"highlight\">予約<rt>yoyaku</rt></ruby>したので、きっと<ruby class=\"highlight\">満足<rt>manzoku</rt></ruby>できると思います。友達と一緒に野球の<ruby class=\"highlight\">試合<rt>shiai</rt></ruby>も見る予定です。"
-        }
-    ];
-
-    let currentBatchSize = 10;
+    let allWords = [];
     let todaysDeck = [];
-    let currentMode = 'card';
-    const STORAGE_KEY = '26words_v5_data';
+    const STORAGE_KEY = '26words_cloud_data';
     let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
-    function initDeck() {
-        const now = Date.now();
-        let pool = rawDatabase.filter(w => !learningData[w.id] || learningData[w.id].nextReview <= now);
-        todaysDeck = pool.slice(0, currentBatchSize).sort(() => Math.random() - 0.5);
-        
-        if (todaysDeck.length > 0) {
-            updateUI();
-            showScreen('card');
-        } else {
-            showScreen('done');
+    async function fetchData() {
+        try {
+            const response = await fetch(SHEET_CSV_URL);
+            const data = await response.text();
+            const rows = data.split('\n').slice(1); // 跳過標題列
+            allWords = rows.map(row => {
+                const cols = row.split(',');
+                return { id: cols[0], level: cols[1], theme: cols[2], word: cols[3], kana: cols[4], romaji: cols[5], meaning: cols[6], passage_jp: cols[7], passage_tw: cols[8] };
+            }).filter(w => w.id);
+            initBatch();
+        } catch (e) {
+            document.getElementById('ui-counter').innerText = "連線失敗";
         }
     }
 
-    function updateUI() {
-        if (!todaysDeck[0]) return;
+    function initBatch() {
+        const now = Date.now();
+        let pool = allWords.filter(w => !learningData[w.id] || learningData[w.id].nextReview <= now);
+        todaysDeck = pool.slice(0, 10).sort(() => Math.random() - 0.5);
+        if (todaysDeck.length > 0) renderCard();
+        else showDone();
+    }
+
+    function renderCard() {
         const cur = todaysDeck[0];
-        document.getElementById('ui-counter').innerText = `${todaysDeck.length} 剩餘`;
+        document.getElementById('ui-counter').innerText = `剩餘 ${todaysDeck.length}`;
         document.getElementById('ui-level-front').innerText = cur.level;
         document.getElementById('ui-level-front').style.background = `var(--${cur.level.toLowerCase()}-color)`;
         document.getElementById('ui-passage-jp').innerHTML = cur.passage_jp;
-        
-        document.getElementById('ui-level-back').innerText = cur.level;
-        document.getElementById('ui-level-back').style.background = `var(--${cur.level.toLowerCase()}-color)`;
         document.getElementById('ui-word').innerText = cur.word;
-        document.getElementById('ui-kana').innerText = cur.kana;
-        document.getElementById('ui-romaji').innerText = cur.romaji;
+        document.getElementById('ui-kana').innerText = `${cur.kana} (${cur.romaji})`;
         document.getElementById('ui-meaning').innerText = cur.meaning;
         document.getElementById('ui-passage-tw').innerText = cur.passage_tw;
-        
-        const art = articleDatabase[0];
-        document.getElementById('ui-art-title').innerText = art.title;
-        document.getElementById('ui-art-body').innerHTML = art.body;
-
         document.getElementById('flashcard').classList.remove('is-flipped');
     }
 
-    function flipCard(e) {
-        if(e.target.closest('button') || e.target.closest('.audio-btn')) return;
-        document.getElementById('flashcard').classList.toggle('is-flipped');
-    }
-
-    function toggleMode() {
-        currentMode = (currentMode === 'card') ? 'article' : 'card';
-        document.getElementById('flashcard').style.display = (currentMode === 'card') ? 'block' : 'none';
-        document.getElementById('article-area').style.display = (currentMode === 'article') ? 'block' : 'none';
-    }
-
     function nextCard(status) {
-        const cur = todaysDeck[0];
-        let record = learningData[cur.id] || { interval: 0 };
-        
-        if (status === 'again') {
-            todaysDeck.push(todaysDeck.shift());
-        } else {
-            record.interval = (status === 'hard') ? Math.max(1, record.interval * 1.5) : Math.max(1, record.interval * 3);
-            record.nextReview = Date.now() + (record.interval * 86400000);
-            learningData[cur.id] = record;
+        const cur = todaysDeck.shift();
+        if (status === 'easy') {
+            learningData[cur.id] = { nextReview: Date.now() + 86400000 };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
-            todaysDeck.shift();
+        } else {
+            todaysDeck.push(cur);
         }
-
+        
         const card = document.getElementById('flashcard');
         card.style.animation = 'slideOutAnim 0.4s forwards';
         setTimeout(() => {
             if (todaysDeck.length > 0) {
-                updateUI();
+                renderCard();
                 card.style.animation = 'slideInAnim 0.4s forwards';
-            } else {
-                showScreen('done');
-            }
+            } else showDone();
         }, 400);
     }
 
-    function showScreen(type) {
-        document.getElementById('card-area').style.display = (type === 'card') ? 'flex' : 'none';
-        document.getElementById('done-screen').style.display = (type === 'done') ? 'flex' : 'none';
+    function showDone() {
+        document.getElementById('card-area').style.display = 'none';
+        document.getElementById('done-screen').style.display = 'flex';
     }
 
-    function startNewBatch() { initDeck(); }
-    function finishSession() { location.reload(); }
-    function speakWord(e) {
-        e.stopPropagation();
-        const u = new SpeechSynthesisUtterance(todaysDeck[0].word);
-        u.lang = 'ja-JP'; window.speechSynthesis.speak(u);
-    }
-
-    window.onload = initDeck;
+    window.onload = fetchData;
 </script>
 </body>
 </html>
