@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v2.0</title>
+    <title>26 Words. v2.1</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .app-container { background-color: #121212; width: 100%; max-width: 400px; height: 100%; max-height: 850px; position: relative; display: flex; flex-direction: column; overflow: hidden;}
@@ -92,7 +92,6 @@
 </div>
 
 <script>
-    // 增加 ID 以利於追蹤學習紀錄
     const rawDatabase = [
         { id: "w1", theme: "體育 (球員加油)", word: "応援", kana: "おうえん", romaji: "ou-en", meaning: "加油 / 應援", passage_jp: "大谷選手のホームランを期待して、みんなで一生懸命<span class=\"highlight\">応援</span>しました。", passage_tw: "期待著大谷選手的全壘打，大家一起拚命地為他加油應援。" },
         { id: "w2", theme: "賽車 (速度感)", word: "速度", kana: "そくど", romaji: "soku-do", meaning: "速度", passage_jp: "F1マシンの<span class=\"highlight\">速度</span>は本当に速いです。コーナーを曲がる技術に驚きました。", passage_tw: "F1賽車的速度真的很快。轉彎的技術讓人驚嘆。" },
@@ -106,20 +105,17 @@
     let todaysDeck = [];
     const cardElement = document.getElementById('flashcard');
 
-    // 1. 初始化今日牌組 (篩選出需要複習的單字)
     function initDeck() {
         const now = new Date().getTime();
         todaysDeck = [];
 
         rawDatabase.forEach(wordObj => {
             const record = learningData[wordObj.id];
-            // 如果沒學過，或是複習時間已經到了，就加入今天的牌組
             if (!record || record.nextReview <= now) {
                 todaysDeck.push(wordObj);
             }
         });
 
-        // 打亂牌組順序，增加新鮮感
         todaysDeck.sort(() => Math.random() - 0.5);
 
         if (todaysDeck.length > 0) {
@@ -129,7 +125,6 @@
         }
     }
 
-    // 2. 載入卡片資料
     function loadCardData() {
         if (todaysDeck.length === 0) {
             showDoneScreen();
@@ -148,13 +143,11 @@
         cardElement.classList.remove('is-flipped', 'slide-up-in', 'slide-up-out');
     }
 
-    // 3. 翻卡邏輯
     function flipCard(event) {
         if(event.target.tagName.toLowerCase() === 'button' || event.target.classList.contains('audio-btn')) return;
         cardElement.classList.toggle('is-flipped');
     }
 
-    // 4. 發音邏輯
     function speakWord(event) {
         event.stopPropagation();
         const word = todaysDeck[0].word;
@@ -164,36 +157,33 @@
         window.speechSynthesis.speak(utterance);
     }
 
-    // 5. 記憶曲線演算法與換卡邏輯
     function nextCard(status) {
+        // 【本次修復核心】：執行滑出前，強制清除前一次的「滑入」標籤，避免動畫互相打架卡死！
+        cardElement.classList.remove('slide-up-in');
+
         const currentWord = todaysDeck[0];
         const record = learningData[currentWord.id] || { interval: 0, nextReview: 0 };
         const now = new Date().getTime();
         const ONE_DAY = 24 * 60 * 60 * 1000;
 
-        // 計算下次複習時間
         if (status === 'again') {
-            // 忘記了：間隔歸零，今天稍後還要再考一次
             record.interval = 0;
-            record.nextReview = now + (5 * 60 * 1000); // 5分鐘後可再次出現
-            todaysDeck.push(todaysDeck.shift()); // 把它塞到牌組最後面
+            record.nextReview = now + (5 * 60 * 1000); 
+            todaysDeck.push(todaysDeck.shift()); 
         } else {
             if (status === 'hard') {
-                // 困難：明天再看一次
                 record.interval = Math.max(1, record.interval * 1.2);
             } else if (status === 'easy') {
-                // 容易：間隔拉長 (例如原本 1天 變 2.5天)
                 record.interval = Math.max(1, record.interval * 2.5);
             }
             record.nextReview = now + (record.interval * ONE_DAY);
-            todaysDeck.shift(); // 從今天的牌組中徹底移除
+            todaysDeck.shift(); 
         }
 
-        // 存檔到本機瀏覽器
         learningData[currentWord.id] = record;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
 
-        // 動畫特效與換下一張
+        // 滑出特效
         cardElement.classList.add('slide-up-out');
         setTimeout(() => {
             loadCardData();
@@ -203,14 +193,6 @@
         }, 400);
     }
 
-    // 6. 顯示完課畫面
-    function showDoneScreen() {
-        document.getElementById('card-area').style.display = 'none';
-        document.getElementById('ui-theme-badge').innerText = 'All Clear!';
-        document.getElementById('done-screen').style.display = 'flex';
-    }
-
-    // 程式啟動
     window.onload = () => initDeck();
 </script>
 
