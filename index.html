@@ -3,48 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v2.1</title>
+    <title>26 Words. v4.0</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .app-container { background-color: #121212; width: 100%; max-width: 400px; height: 100%; max-height: 850px; position: relative; display: flex; flex-direction: column; overflow: hidden;}
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px; z-index: 10; font-size: 0.9rem; font-weight: 600; color: #8e8e93; }
         .theme-badge { background-color: #333; padding: 5px 12px; border-radius: 15px; color: #fff; font-size: 0.8rem;}
         .card-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 0 20px 40px 20px; perspective: 1000px; }
-        .card { width: 100%; height: 100%; max-height: 550px; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1), opacity 0.4s; transform-style: preserve-3d; cursor: pointer; color: #1c1c1e; }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 20px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
         
+        .card { width: 100%; height: 100%; max-height: 550px; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative; color: #1c1c1e; transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1); cursor: pointer; }
+        .card.is-flipped { transform: rotateY(180deg); }
+        
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
+        
+        /* 分級標籤設計 (右上角) */
+        .level-badge { position: absolute; top: 20px; right: 20px; padding: 4px 10px; border-radius: 6px; color: white; font-weight: 800; font-size: 0.85rem; letter-spacing: 1px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 5; }
+
+        /* 正面：閱讀與拼音 */
         .card-front { background-color: #ffffff; justify-content: center; }
-        .passage-text { font-size: 1.4rem; line-height: 1.8; font-weight: 500; }
+        .passage-text { font-size: 1.4rem; line-height: 2; font-weight: 500; }
         .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.1); padding: 0 4px; border-radius: 4px;}
+        ruby { ruby-align: center; }
+        rt { font-size: 0.6em; color: #e74c3c; font-family: monospace; transform: translateY(-3px); }
         .tap-hint { margin-top: auto; text-align: center; color: #8e8e93; font-size: 0.8rem; animation: pulse 2s infinite; }
         
+        /* 背面：詳細解析 */
         .card-back { background-color: #fafafa; transform: rotateY(180deg); }
         .word-header { margin-bottom: 15px; border-bottom: 1px solid #e5e5ea; padding-bottom: 15px; position: relative;}
         .word-kanji { font-size: 2.2rem; font-weight: 800; margin: 0;}
         .word-romaji { font-size: 0.9rem; color: #8e8e93; font-family: monospace; text-transform: lowercase; margin-bottom: 5px; }
         .word-kana { font-size: 1.1rem; color: #555; margin: 0 0 5px 0;}
         .word-meaning { font-size: 1.2rem; font-weight: 600; color: #2ecc71; margin: 0;}
-        .audio-btn { position: absolute; right: 0; top: 10px; font-size: 1.5rem; cursor: pointer; color: #1c1c1e; opacity: 0.6; }
+        
+        /* 喇叭按鈕下移，避開分級標籤 */
+        .audio-btn { position: absolute; right: -5px; top: 40px; font-size: 1.8rem; cursor: pointer; color: #1c1c1e; opacity: 0.8; transition: 0.2s;}
+        .audio-btn:active { transform: scale(0.9); }
         
         .translation-box { background-color: #f2f2f7; padding: 15px; border-radius: 12px; margin-bottom: 15px; flex: 1; overflow-y: auto;}
         .translation-label { font-size: 0.8rem; color: #8e8e93; margin-bottom: 8px; font-weight: 600;}
         .translation-text { font-size: 0.95rem; line-height: 1.6; color: #3a3a3c;}
         
         .btn-group { display: flex; gap: 10px; margin-top: auto; }
-        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 600; cursor: pointer; padding: 16px 0; font-size: 1rem; border: none; transition: 0.2s;}
+        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 600; cursor: pointer; padding: 16px 0; font-size: 1rem; border: none; transition: 0.2s; -webkit-tap-highlight-color: transparent;}
         .btn-forget { background-color: #ffeaea; color: #e74c3c; }
         .btn-vague { background-color: #e5e5ea; color: #8e8e93; }
         .btn-familiar { background-color: #e2fbe2; color: #2ecc71; }
-        
-        .card.is-flipped { transform: rotateY(180deg); }
-        .card.slide-up-out { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; }
-        .card.slide-up-in { transform: translateY(100%) scale(0.9); opacity: 0; animation: slideIn 0.5s cubic-bezier(0.4, 0.0, 0.2, 1) forwards; }
         
         .done-screen { display: none; text-align: center; color: #fff; padding: 40px; flex-direction: column; justify-content: center; height: 100%; }
         .done-title { font-size: 2rem; margin-bottom: 10px; color: #2ecc71; }
         .done-text { color: #8e8e93; line-height: 1.6; }
 
-        @keyframes slideIn { to { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; } }
+        @keyframes slideInAnim { from { transform: translateY(100%) scale(0.9); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
     </style>
 </head>
@@ -59,10 +69,12 @@
     <div class="card-wrapper" id="card-area">
         <div class="card" id="flashcard" onclick="flipCard(event)">
             <div class="card-face card-front">
+                <div class="level-badge" id="ui-level-front"></div>
                 <div class="passage-text" id="ui-passage-jp"></div>
-                <div class="tap-hint">點擊卡片看解析</div>
+                <div class="tap-hint">點擊卡片看解析 🔄</div>
             </div>
             <div class="card-face card-back">
+                <div class="level-badge" id="ui-level-back"></div>
                 <div class="word-header">
                     <div class="audio-btn" onclick="speakWord(event)">🔊</div>
                     <div class="word-romaji" id="ui-romaji"></div>
@@ -85,20 +97,40 @@
 
     <div class="done-screen" id="done-screen">
         <div style="font-size: 4rem; margin-bottom: 20px;">🎉</div>
-        <h2 class="done-title">今日任務完成</h2>
-        <p class="done-text">你已經複習完今天所有的單字了！<br>大腦需要休息，明天再來吧。</p>
-        <button class="btn btn-familiar" style="margin-top: 30px; background-color: #333; color: white;" onclick="location.reload()">重新整理</button>
+        <h2 class="done-title">任務完成</h2>
+        <p class="done-text">今日單字已全數複習完畢！<br>休息一下，明天再來吧。</p>
+        <button class="btn btn-familiar" style="margin-top: 30px; background-color: #333; color: white;" onclick="location.reload()">強制重整測試</button>
     </div>
 </div>
 
 <script>
+    // 根據 PDF 講義內容萃取的混合分級資料庫
     const rawDatabase = [
-        { id: "w1", theme: "體育 (球員加油)", word: "応援", kana: "おうえん", romaji: "ou-en", meaning: "加油 / 應援", passage_jp: "大谷選手のホームランを期待して、みんなで一生懸命<span class=\"highlight\">応援</span>しました。", passage_tw: "期待著大谷選手的全壘打，大家一起拚命地為他加油應援。" },
-        { id: "w2", theme: "賽車 (速度感)", word: "速度", kana: "そくど", romaji: "soku-do", meaning: "速度", passage_jp: "F1マシンの<span class=\"highlight\">速度</span>は本当に速いです。コーナーを曲がる技術に驚きました。", passage_tw: "F1賽車的速度真的很快。轉彎的技術讓人驚嘆。" },
-        { id: "w3", theme: "電影 (動畫感動)", word: "感動", kana: "かんどう", romaji: "kan-dou", meaning: "感動", passage_jp: "子供の頃に見たおもちゃの映画を思い出して、とても<span class=\"highlight\">感動</span>しました。", passage_tw: "回想起小時候看過的玩具電影，感到非常感動。" },
-        { id: "w4", theme: "旅行 (行程安排)", word: "予約", kana: "よやく", romaji: "yo-yaku", meaning: "預約 / 訂位", passage_jp: "台南の人気なレストランを<span class=\"highlight\">予約</span>しておきました。楽しみですね。", passage_tw: "我已經預約好了台南的人氣餐廳。真令人期待。" },
-        { id: "w5", theme: "文化 (獨特氛圍)", word: "雰囲気", kana: "ふんいき", romaji: "fun-iki", meaning: "氣氛 / 氛圍", passage_jp: "この古いモールの<span class=\"highlight\">雰囲気</span>は、どこか懐かしい感じがしますね。", passage_tw: "這個舊商場的氛圍，總覺得有種令人懷念的感覺。" }
+        // N3 單字來源：JN026wordlist.pdf
+        { id: "w1", level: "N3", theme: "情感", word: "愛情", kana: "あいじょう", romaji: "ai-jou", meaning: "情感, 愛", passage_jp: "母親の<ruby class=\"highlight\">愛情<rt>ai-jou</rt></ruby>は海より深いです。", passage_tw: "母親的愛比海還深。" },
+        { id: "w2", level: "N3", theme: "體育", word: "応援", kana: "おうえん", romaji: "ou-en", meaning: "加油 / 應援", passage_jp: "みんなで大谷選手を<ruby class=\"highlight\">応援<rt>ou-en</rt></ruby>しましょう。", passage_tw: "大家一起為大谷選手加油吧。" },
+        
+        // N4 單字來源：JN027wordlist.pdf
+        { id: "w3", level: "N4", theme: "心情", word: "安心", kana: "あんしん", romaji: "an-shin", meaning: "安心", passage_jp: "無事に着いて<ruby class=\"highlight\">安心<rt>an-shin</rt></ruby>しました。", passage_tw: "平安抵達我就放心了。" },
+        { id: "w4", level: "N4", theme: "旅行", word: "案内", kana: "あんない", romaji: "an-nai", meaning: "帶路, 導覽", passage_jp: "私が京都の町を<ruby class=\"highlight\">案内<rt>an-nai</rt></ruby>します。", passage_tw: "我來為您導覽京都的街道。" },
+        
+        // N5 單字來源：JN028wordlist.pdf
+        { id: "w5", level: "N5", theme: "日常", word: "新しい", kana: "あたらしい", romaji: "atara-shii", meaning: "新的", passage_jp: "<ruby class=\"highlight\">新<rt>atara</rt></ruby>しいスニーカーを買いました。", passage_tw: "買了新的運動鞋。" },
+        { id: "w6", level: "N5", theme: "顏色", word: "青い", kana: "あおい", romaji: "ao-i", meaning: "藍的", passage_jp: "今日の空はとても<ruby class=\"highlight\">青<rt>ao</rt></ruby>いです。", passage_tw: "今天的天空非常藍。" },
+        
+        // 其他範圍
+        { id: "w7", level: "其他", theme: "美學", word: "夢核", kana: "ゆめかく", romaji: "yume-kaku", meaning: "Dreamcore", passage_jp: "<ruby class=\"highlight\">夢核<rt>yume-kaku</rt></ruby>の画像は少し不思議です。", passage_tw: "Dreamcore 的圖片有點不可思議。" }
     ];
+
+    // 決定標籤顏色的函數
+    function getLevelColor(level) {
+        switch(level) {
+            case "N3": return "#2ecc71"; // 綠色
+            case "N4": return "#3498db"; // 藍色
+            case "N5": return "#f39c12"; // 橘黃色
+            default: return "#9b59b6";   // 紫色 (其他)
+        }
+    }
 
     const STORAGE_KEY = '26words_learning_data';
     let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
@@ -108,28 +140,18 @@
     function initDeck() {
         const now = new Date().getTime();
         todaysDeck = [];
-
         rawDatabase.forEach(wordObj => {
             const record = learningData[wordObj.id];
-            if (!record || record.nextReview <= now) {
-                todaysDeck.push(wordObj);
-            }
+            if (!record || record.nextReview <= now) todaysDeck.push(wordObj);
         });
-
         todaysDeck.sort(() => Math.random() - 0.5);
 
-        if (todaysDeck.length > 0) {
-            loadCardData();
-        } else {
-            showDoneScreen();
-        }
+        if (todaysDeck.length > 0) loadCardData();
+        else showDoneScreen();
     }
 
     function loadCardData() {
-        if (todaysDeck.length === 0) {
-            showDoneScreen();
-            return;
-        }
+        if (todaysDeck.length === 0) { showDoneScreen(); return; }
         
         const currentWord = todaysDeck[0];
         document.getElementById('ui-theme-badge').innerText = `剩餘 ${todaysDeck.length} 詞`;
@@ -140,57 +162,75 @@
         document.getElementById('ui-meaning').innerText = currentWord.meaning;
         document.getElementById('ui-passage-tw').innerText = currentWord.passage_tw;
         
-        cardElement.classList.remove('is-flipped', 'slide-up-in', 'slide-up-out');
+        // 設定分級標籤的文字與顏色
+        const lvlColor = getLevelColor(currentWord.level);
+        const frontBadge = document.getElementById('ui-level-front');
+        const backBadge = document.getElementById('ui-level-back');
+        
+        frontBadge.innerText = currentWord.level;
+        frontBadge.style.backgroundColor = lvlColor;
+        backBadge.innerText = currentWord.level;
+        backBadge.style.backgroundColor = lvlColor;
+
+        cardElement.classList.remove('is-flipped');
     }
 
     function flipCard(event) {
         if(event.target.tagName.toLowerCase() === 'button' || event.target.classList.contains('audio-btn')) return;
+        if(cardElement.dataset.animating === 'true') return;
         cardElement.classList.toggle('is-flipped');
     }
 
     function speakWord(event) {
         event.stopPropagation();
-        const word = todaysDeck[0].word;
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = 'ja-JP';
-        utterance.rate = 0.8; 
+        const utterance = new SpeechSynthesisUtterance(todaysDeck[0].word);
+        utterance.lang = 'ja-JP'; utterance.rate = 0.8; 
         window.speechSynthesis.speak(utterance);
     }
 
     function nextCard(status) {
-        // 【本次修復核心】：執行滑出前，強制清除前一次的「滑入」標籤，避免動畫互相打架卡死！
-        cardElement.classList.remove('slide-up-in');
+        if(cardElement.dataset.animating === 'true') return;
+        cardElement.dataset.animating = 'true'; 
 
         const currentWord = todaysDeck[0];
         const record = learningData[currentWord.id] || { interval: 0, nextReview: 0 };
         const now = new Date().getTime();
-        const ONE_DAY = 24 * 60 * 60 * 1000;
 
         if (status === 'again') {
-            record.interval = 0;
-            record.nextReview = now + (5 * 60 * 1000); 
+            record.interval = 0; record.nextReview = now + 300000;
             todaysDeck.push(todaysDeck.shift()); 
         } else {
-            if (status === 'hard') {
-                record.interval = Math.max(1, record.interval * 1.2);
-            } else if (status === 'easy') {
-                record.interval = Math.max(1, record.interval * 2.5);
-            }
-            record.nextReview = now + (record.interval * ONE_DAY);
+            record.interval = (status === 'hard') ? Math.max(1, record.interval * 1.2) : Math.max(1, record.interval * 2.5);
+            record.nextReview = now + (record.interval * 86400000);
             todaysDeck.shift(); 
         }
 
         learningData[currentWord.id] = record;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
 
-        // 滑出特效
-        cardElement.classList.add('slide-up-out');
+        cardElement.style.transition = 'none';
+        cardElement.style.animation = 'slideOutAnim 0.4s forwards';
+
         setTimeout(() => {
             loadCardData();
             if (todaysDeck.length > 0) {
-                cardElement.classList.add('slide-up-in');
+                cardElement.style.animation = 'none';
+                void cardElement.offsetWidth; 
+                cardElement.style.animation = 'slideInAnim 0.4s forwards';
+                
+                setTimeout(() => {
+                    cardElement.style.transition = 'transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1)';
+                    cardElement.style.animation = '';
+                    cardElement.dataset.animating = 'false'; 
+                }, 400);
             }
         }, 400);
+    }
+
+    function showDoneScreen() {
+        document.getElementById('card-area').style.display = 'none';
+        document.getElementById('ui-theme-badge').innerText = 'All Clear!';
+        document.getElementById('done-screen').style.display = 'flex';
     }
 
     window.onload = () => initDeck();
