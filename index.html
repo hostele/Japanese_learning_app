@@ -3,87 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v7.0 Ultimate</title>
+    <title>26 Words. v8.0 Master Edition</title>
     <style>
         :root { 
             --n3-color: #2ecc71; --n4-color: #3498db; --n5-color: #f39c12; --other-color: #9b59b6;
             --bg-hard: #fff5f5; --bg-good: #f8f9fa; --bg-easy: #f2fff5; --bg-unseen: #fffdf0;
-            --brand-color: #2ecc71;
+            --brand-color: #2ecc71; --nav-bg: #1c1c1e;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background-color: #121212; color: #fff; margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         .app-container { background-color: #121212; width: 100%; max-width: 400px; height: 100%; max-height: 850px; position: relative; display: flex; flex-direction: column; overflow: hidden;}
         
-        /* 頂部導覽列 */
         .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; font-size: 0.85rem; border-bottom: 1px solid #222; background: #121212; z-index: 10;}
-        
-        /* 中間內容區 (容納三個分頁) */
         .content-area { flex: 1; position: relative; overflow: hidden; }
         .view-section { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; overflow-y: auto; padding-bottom: 80px; }
         .view-section.active { display: flex; }
 
-        /* 卡片系統 */
+        /* 卡片與動畫 */
         .card-wrapper { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; perspective: 1000px; }
-        .card { width: 100%; height: 100%; max-height: 600px; background-color: #ffffff; border-radius: 28px; position: relative; color: #1c1c1e; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
+        .card { width: 100%; height: 100%; max-height: 580px; background-color: #ffffff; border-radius: 28px; position: relative; color: #1c1c1e; transform-style: preserve-3d; transition: transform 0.6s; cursor: pointer; }
         .card.is-flipped { transform: rotateY(180deg); }
         .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 28px; padding: 30px; box-sizing: border-box; display: flex; flex-direction: column; }
+        .card-front { justify-content: center; align-items: center; text-align: center; }
+        .card-back { background-color: #fafafa; transform: rotateY(180deg); }
         
-        /* 正面 */
-        .card-front { background-color: #ffffff; justify-content: center; align-items: center; text-align: center; }
+        /* 文字排版 */
         .passage-text { font-size: 1.6rem; line-height: 2.6; font-weight: 500; width: 100%; }
         ruby { ruby-align: center; }
         rt { font-size: 0.55em; color: #8e8e93; font-family: monospace; transform: translateY(-2px); }
-        .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.05); padding: 2px 4px; border-radius: 4px;}
+        .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.05); padding: 2px 4px; border-radius: 4px; border-bottom: 2px solid #e74c3c; cursor: help;}
         .highlight rt { color: #e74c3c; }
 
-        /* 背面 */
-        .card-back { background-color: #fafafa; transform: rotateY(180deg); }
-        .word-main-area { position: relative; flex: 1.5; display: flex; flex-direction: column; justify-content: center; border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
-        .ui-word { font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -1px; width: 85%;}
-        .ui-reading { font-size: 1.2rem; color: #8e8e93; margin: 8px 0; }
-        .ui-meaning { font-size: 1.6rem; font-weight: 700; color: #2ecc71; margin: 0; }
-        .audio-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 2rem; cursor: pointer; opacity: 0.8; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
-        .audio-btn:active { transform: translateY(-50%) scale(0.9); }
-        .example-area { flex: 1; overflow-y: auto; text-align: left; }
-        .ex-jp { font-size: 1.1rem; line-height: 1.8; color: #1c1c1e; margin-bottom: 10px; }
-        .ex-tw { font-size: 0.95rem; color: #666; border-left: 3px solid #eee; padding-left: 10px; }
+        .word-main-area { position: relative; border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px; }
+        .ui-word { font-size: 2.8rem; font-weight: 900; margin: 0; letter-spacing: -1px; }
+        .ui-meaning { font-size: 1.5rem; font-weight: 700; color: var(--brand-color); margin: 5px 0; }
+        .audio-btn { position: absolute; right: 0; top: 10px; font-size: 2rem; cursor: pointer; opacity: 0.8; }
 
-        .btn-group { display: flex; gap: 8px; margin-top: 20px; }
-        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 700; padding: 16px 0; border: none; cursor: pointer; font-size: 0.9rem; -webkit-tap-highlight-color: transparent;}
+        .btn-group { display: flex; gap: 8px; margin-top: auto; }
+        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 700; padding: 16px 0; border: none; cursor: pointer; font-size: 0.9rem; }
         .btn-hard { background-color: #ffeaea; color: #e74c3c; }
         .btn-good { background-color: #f2f2f7; color: #555; }
         .btn-easy { background-color: #e2fbe2; color: #2ecc71; }
 
-        /* 單字清單介面 */
-        .list-container { padding: 20px; }
-        .list-item { background: white; color: #1c1c1e; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.2);}
-        .list-word { font-weight: 800; font-size: 1.2rem; }
-        .list-meaning { color: #666; font-size: 0.9rem; }
-        .list-label { font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; color: white; margin-left: 8px; }
-
-        /* 短文閱讀介面 */
-        .article-container { padding: 20px; }
-        .article-card { background: white; color: #1c1c1e; border-radius: 20px; padding: 25px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);}
-        .art-title { font-size: 1.5rem; font-weight: 800; margin-top: 0; margin-bottom: 5px;}
-        .art-meta { font-size: 0.8rem; color: var(--brand-color); font-weight: bold; margin-bottom: 20px; display: block;}
-        .art-jp { font-size: 1.2rem; line-height: 2.2; margin-bottom: 20px; }
-        .art-tw { font-size: 0.95rem; line-height: 1.8; color: #555; border-top: 1px dashed #ccc; padding-top: 20px;}
-
-        /* 完成畫面 */
-        .level-badge { position: absolute; top: 20px; right: 20px; padding: 4px 10px; border-radius: 6px; color: white; font-weight: 800; font-size: 0.75rem; z-index: 5; }
-        .done-screen { display: none; text-align: center; color: #fff; padding: 40px; flex-direction: column; justify-content: center; height: 100%; }
+        /* 統計頁面 */
+        .stats-container { padding: 25px; }
+        .stats-header { text-align: center; margin-bottom: 30px; }
+        .progress-circle { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--brand-color) 0%, #333 0%); margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; position: relative; border: 8px solid #222; }
+        .progress-inner { width: 120px; height: 120px; background: #121212; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-card { background: #1c1c1e; padding: 15px; border-radius: 15px; border-left: 5px solid #333; }
         
-        /* 💡 底部導覽列 (全新設計) */
-        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 70px; background: #1c1c1e; display: flex; border-top: 1px solid #333; z-index: 20;}
-        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #8e8e93; cursor: pointer; transition: 0.2s; position: relative;}
+        /* 導覽列 */
+        .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--nav-bg); display: flex; border-top: 1px solid #333; z-index: 20;}
+        .nav-item { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: #8e8e93; cursor: pointer; position: relative;}
         .nav-item.active { color: var(--brand-color); }
-        .nav-icon { font-size: 1.5rem; margin-bottom: 4px;}
-        .nav-text { font-size: 0.7rem; font-weight: 600;}
-        
-        /* 紅點閃爍提醒 */
-        .notification-badge { position: absolute; top: 10px; right: 30%; width: 10px; height: 10px; background-color: #e74c3c; border-radius: 50%; display: none; box-shadow: 0 0 8px #e74c3c; animation: flash 1.5s infinite;}
+        .nav-icon { font-size: 1.4rem; margin-bottom: 3px;}
+        .nav-text { font-size: 0.65rem; font-weight: 600;}
+        .nav-item:nth-child(3) .nav-icon { font-size: 1.8rem; transform: translateY(-5px); background: #333; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #121212; color: #fff;}
+        .nav-item:nth-child(3).active .nav-icon { background: var(--brand-color); }
 
-        @keyframes flash { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
-        @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg); opacity: 0; } }
+        /* 短文彈窗 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+        .modal-card { width: 100%; max-width: 350px; background: white; border-radius: 25px; color: #1c1c1e; overflow: hidden; }
+
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; } }
         @keyframes slideInAnim { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
@@ -91,30 +74,29 @@
 
 <div class="app-container">
     <div class="top-bar">
-        <span id="ui-title" style="font-weight: bold; font-size: 1rem;">每日任務</span>
-        <span id="ui-status" style="color: var(--brand-color);">● 雲端 v7.0</span>
+        <span id="ui-title" style="font-weight: 900; letter-spacing: 1px;">PRACTICE</span>
+        <span id="ui-status" style="color: var(--brand-color);">● v8.0 Master</span>
     </div>
 
     <div class="content-area">
-        
         <div id="view-review" class="view-section active">
             <div class="card-wrapper" id="card-area">
                 <div class="card" id="flashcard" onclick="this.classList.toggle('is-flipped')">
                     <div class="card-face card-front">
-                        <div class="level-badge" id="ui-level-front"></div>
+                        <div id="ui-level-front" style="position:absolute; top:20px; right:20px; padding:4px 10px; border-radius:6px; color:white; font-weight:800; font-size:0.7rem;"></div>
                         <div class="passage-text" id="ui-passage-jp"></div>
                     </div>
                     <div class="card-face card-back">
-                        <div class="level-badge" id="ui-level-back"></div>
+                        <div id="ui-level-back" style="position:absolute; top:20px; right:20px; padding:4px 10px; border-radius:6px; color:white; font-weight:800; font-size:0.7rem;"></div>
                         <div class="word-main-area">
                             <div class="audio-btn" onclick="speakWord(event)">🔊</div>
                             <p class="ui-word" id="ui-word"></p>
-                            <p class="ui-reading" id="ui-kana"></p>
+                            <p style="color:#8e8e93; margin:5px 0;" id="ui-kana"></p>
                             <p class="ui-meaning" id="ui-meaning"></p>
                         </div>
-                        <div class="example-area">
-                            <div class="ex-jp" id="ui-ex-jp"></div>
-                            <div class="ex-tw" id="ui-ex-tw"></div>
+                        <div style="flex:1; overflow-y:auto; text-align:left;">
+                            <div style="font-size:1.1rem; line-height:1.8; margin-bottom:10px;" id="ui-ex-jp"></div>
+                            <div style="font-size:0.9rem; color:#666; border-left:3px solid #eee; padding-left:10px;" id="ui-ex-tw"></div>
                         </div>
                         <div class="btn-group">
                             <button class="btn btn-hard" onclick="nextCard(event, 'hard')">困難</button>
@@ -124,110 +106,123 @@
                     </div>
                 </div>
             </div>
-
-            <div class="done-screen" id="done-screen">
-                <div style="font-size: 4rem;">🎉</div>
-                <h2 style="margin-bottom: 5px;">任務完成</h2>
-                <p style="color: #8e8e93; font-size: 0.9rem; margin-top: 0;">目前沒有需要複習的單字囉！</p>
-                <button class="btn btn-good" style="margin-top:20px; background:#333; color:white; width:100%" onclick="forceMoreCards()">強迫再來 5 個</button>
+            <div id="done-screen" style="display:none; text-align:center; padding:40px; justify-content:center; height:100%; flex-direction:column;">
+                <div style="font-size:4rem;">🎊</div>
+                <h2>目前進度完成</h2>
+                <p style="color:#8e8e93;">太棒了！休息一下，或是去短文區看看吧。</p>
             </div>
         </div>
 
-        <div id="view-article" class="view-section">
-            <div class="article-container" id="article-list">
-                </div>
+        <div id="view-article" class="view-section" style="padding:20px;">
+            <div id="article-list"></div>
         </div>
 
-        <div id="view-library" class="view-section">
-            <div class="list-container" id="list-content">
-                </div>
+        <div id="view-library" class="view-section" style="padding:15px;">
+            <div id="library-content"></div>
         </div>
 
+        <div id="view-stats" class="view-section">
+            <div class="stats-container">
+                <div class="stats-header">
+                    <div class="progress-circle" id="ui-stat-circle">
+                        <div class="progress-inner">
+                            <span style="font-size:0.7rem; color:#888;">總達成率</span>
+                            <b id="ui-stat-percent" style="font-size:1.5rem; color:var(--brand-color);">0%</b>
+                        </div>
+                    </div>
+                    <h2 id="ui-stat-total">已收錄 0 單字</h2>
+                </div>
+                <div class="stat-grid">
+                    <div class="stat-card" style="border-color: #2ecc71;">掌握中 (Easy)<br><b id="count-easy">0</b></div>
+                    <div class="stat-card" style="border-color: #8e8e93;">學習中 (Good)<br><b id="count-good">0</b></div>
+                    <div class="stat-card" style="border-color: #e74c3c;">複習中 (Hard)<br><b id="count-hard">0</b></div>
+                    <div class="stat-card" style="border-color: #f39c12;">未開始 (Unseen)<br><b id="count-unseen">0</b></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="bottom-nav">
-        <div class="nav-item active" onclick="switchTab('review')">
-            <div class="notification-badge" id="badge-review"></div>
-            <div class="nav-icon">🃏</div>
-            <div class="nav-text">複習</div>
+        <div class="nav-item" onclick="switchTab('article')"><div class="nav-icon">📖</div><div class="nav-text">短文</div></div>
+        <div class="nav-item" onclick="switchTab('review')">
+            <div style="position:absolute; top:8px; right:20%; width:8px; height:8px; background:#e74c3c; border-radius:50%; display:none; animation:flash 1s infinite;" id="badge-review"></div>
+            <div class="nav-icon">🃏</div><div class="nav-text">複習</div>
         </div>
-        <div class="nav-item" onclick="switchTab('article')">
-            <div class="nav-icon">📖</div>
-            <div class="nav-text">短文</div>
-        </div>
-        <div class="nav-item" onclick="switchTab('library')">
-            <div class="nav-icon">🗂️</div>
-            <div class="nav-text">單字庫</div>
-        </div>
+        <div class="nav-item active" onclick="switchTab('review', true)"><div class="nav-icon">🎯</div><div class="nav-text">練習</div></div>
+        <div class="nav-item" onclick="switchTab('library')"><div class="nav-icon">🗂️</div><div class="nav-text">單字庫</div></div>
+        <div class="nav-item" onclick="switchTab('stats')"><div class="nav-icon">📊</div><div class="nav-text">統計</div></div>
     </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+    <div class="modal-card" id="modal-card" onclick="event.stopPropagation()">
+        </div>
 </div>
 
 <script>
     // 【貼上你的 Google Sheets CSV 網址】
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pub?output=csv'; 
 
-    // 📖 駐站 AI 短文資料庫 (你可以隨時找我擴充這裡的內容！)
+    let allWords = [];
+    let currentDeck = [];
+    let isAnimating = false;
+    let practiceMode = true; // 是否為練習新字模式
+    const STORAGE_KEY = '26words_cloud_v8';
+    let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
     const ARTICLE_DB = [
         {
-            title: "新入社員の初日",
-            level: "N4-N5 綜合應用",
-            content_jp: "今日は<ruby class='highlight'>新<rt>あたら</rt></ruby>しい<ruby class='highlight'>会社<rt>かいしゃ</rt></ruby>の初日です。朝、<ruby class='highlight'>緊張<rt>きんちょう</rt></ruby>しながら<ruby class='highlight'>電車<rt>でんしゃ</rt></ruby>に乗りました。オフィスに着いて、先輩に<ruby class='highlight'>挨拶<rt>あいさつ</rt></ruby>をしました。私の<ruby class='highlight'>担当<rt>たんとう</rt></ruby>はシステムの<ruby class='highlight'>改善<rt>かいぜん</rt></ruby>です。少し<ruby class='highlight'>複雑<rt>ふくざつ</rt></ruby>ですが、<ruby class='highlight'>一生懸命<rt>いっしょうけんめい</rt></ruby>頑張ります。仕事のあとは、先輩が美味しいカフェを<ruby class='highlight'>紹介<rt>しょうかい</rt></ruby>してくれました。",
-            content_tw: "今天是新公司的第一天。早上，我一邊緊張一邊搭上了電車。抵達辦公室後，向平輩打了招呼。我的職責是系統的改善。雖然有點複雜，但我會拼命努力的。工作結束後，前輩介紹了一家好吃的咖啡廳給我。"
+            title: "Advantech PMの日常",
+            level: "N3-N4 職場應用",
+            content_jp: "研華(Advantech)の<ruby>担当者<rt>tantousha</rt></ruby>として、新しい<span class='highlight' onclick='openWordModal(\"w506\")'><ruby>計画<rt>keikaku</rt></ruby></span>を立てました。システムをさらに<span class='highlight' onclick='openWordModal(\"w513\")'><ruby>改善<rt>kaizen</rt></ruby></span>するために、会議の<span class='highlight' onclick='openWordModal(\"w507\")'><ruby>準備<rt>juunbi</rt></ruby></span>が必要です。お客様の<span class='highlight' onclick='openWordModal(\"w517\")'><ruby>期待<rt>kitai</rt></ruby></span>に応えるのは大変ですが、チームが大会で<span class='highlight' onclick='openWordModal(\"w515\")'><ruby>優勝<rt>yuushou</rt></ruby></span>したときのような喜びがあります。",
+            content_tw: "作為研華的負責人，制定了新的計畫。為了進一步改善系統，會議的準備是必要的。雖然回應客戶的期待很辛苦，但會有像團隊在比賽中獲得冠軍時那樣的喜悅。"
         }
     ];
-
-    let allWords = [];
-    let todaysDeck = [];
-    let isAnimating = false;
-    const STORAGE_KEY = '26words_cloud_v7';
-    let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
     async function fetchData() {
         try {
             const response = await fetch(SHEET_CSV_URL);
             const data = await response.text();
-            if (data.trim().startsWith('<')) throw new Error("網址格式錯誤");
-
             const rows = data.split('\n').slice(1);
             allWords = rows.map(row => {
                 const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
                 const cols = row.split(regex).map(col => col.replace(/^"|"$/g, '').trim());
                 if(cols.length < 8) return null; 
                 return { id: cols[0], lvl: cols[1], theme: cols[2], w: cols[3], k: cols[4], r: cols[5], m: cols[6], p_jp: cols[7], p_tw: cols[8] };
-            }).filter(w => w !== null && w.id);
-
-            initBatch();
+            }).filter(w => w && w.id);
+            initDecks();
             renderArticles();
-        } catch (e) { 
-            document.getElementById('ui-title').innerText = "❌ 網址錯誤";
-            document.getElementById('ui-status').innerText = "連線失敗";
-        }
+        } catch (e) { document.getElementById('ui-title').innerText = "連線失敗"; }
     }
 
-    function initBatch() {
+    function initDecks() {
         const now = Date.now();
-        let dueWords = allWords.filter(w => !learningData[w.id] || !learningData[w.id].nextReview || learningData[w.id].nextReview <= now);
-        
-        // 如果有待複習單字，亮起紅點
+        // 複習邏輯：已學過 且 時間到了
+        const dueWords = allWords.filter(w => learningData[w.id] && learningData[w.id].nextReview <= now);
         document.getElementById('badge-review').style.display = dueWords.length > 0 ? 'block' : 'none';
+        
+        if (practiceMode) {
+            // 練習邏輯：未學過 (unseen)
+            currentDeck = allWords.filter(w => !learningData[w.id]).slice(0, 10).sort(() => Math.random() - 0.5);
+            document.getElementById('ui-title').innerText = "練習新單字";
+        } else {
+            currentDeck = dueWords.slice(0, 10).sort(() => Math.random() - 0.5);
+            document.getElementById('ui-title').innerText = "每日複習";
+        }
 
-        todaysDeck = dueWords.slice(0, 10).sort(() => Math.random() - 0.5);
-        if (todaysDeck.length > 0) renderCard();
+        if (currentDeck.length > 0) renderCard();
         else showDone();
     }
 
     function renderCard() {
         document.getElementById('card-area').style.display = 'flex';
         document.getElementById('done-screen').style.display = 'none';
-
-        const cur = todaysDeck[0];
-        const lvlColor = `var(--${(cur.lvl || 'other').toLowerCase()}-color)`;
-        
-        ['ui-level-front', 'ui-level-back'].forEach(id => {
-            document.getElementById(id).innerText = cur.lvl;
-            document.getElementById(id).style.background = lvlColor;
+        const cur = currentDeck[0];
+        const color = `var(--${(cur.lvl || 'other').toLowerCase()}-color)`;
+        ['ui-level-front', 'ui-level-back'].forEach(id => { 
+            const el = document.getElementById(id);
+            el.innerText = cur.lvl; el.style.background = color;
         });
-
         document.getElementById('ui-passage-jp').innerHTML = cur.p_jp;
         document.getElementById('ui-word').innerText = cur.w;
         document.getElementById('ui-kana').innerText = `${cur.k} (${cur.r})`;
@@ -238,125 +233,106 @@
     }
 
     function nextCard(e, status) {
-        e.stopPropagation();
-        if (isAnimating) return;
-        isAnimating = true;
-
-        const cur = todaysDeck.shift();
+        e.stopPropagation(); if (isAnimating) return; isAnimating = true;
+        const cur = currentDeck.shift();
         let record = learningData[cur.id] || { interval: 0 };
-        const now = Date.now();
-        record.lastStatus = status; 
+        record.lastStatus = status;
 
-        // 💡 破除困難地獄：不再塞回牌組，而是設定 12 小時後複習
         if (status === 'hard') {
-            record.interval = 0.5; // 0.5 天 = 12 小時
-            record.nextReview = now + (0.5 * 86400000);
+            record.interval = 0.5; record.nextReview = Date.now() + 43200000; // 12小時後
         } else {
             record.interval = (status === 'good') ? Math.max(1, (record.interval || 1) * 1.5) : Math.max(2, (record.interval || 1) * 2.5);
-            record.nextReview = now + (record.interval * 86400000);
+            record.nextReview = Date.now() + (record.interval * 86400000);
         }
-
         learningData[cur.id] = record;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
 
         const card = document.getElementById('flashcard');
         card.style.animation = 'slideOutAnim 0.4s forwards';
         setTimeout(() => {
-            if (todaysDeck.length > 0) {
+            if (currentDeck.length > 0) {
                 renderCard();
                 card.style.animation = 'none'; void card.offsetWidth;
                 card.style.animation = 'slideInAnim 0.4s forwards';
                 setTimeout(() => { isAnimating = false; card.style.animation = ''; }, 400);
-            } else { 
-                document.getElementById('badge-review').style.display = 'none'; // 熄滅紅點
-                showDone(); 
-                isAnimating = false; 
-            }
+            } else { showDone(); isAnimating = false; initDecks(); }
         }, 400);
     }
 
-    function showDone() {
-        document.getElementById('card-area').style.display = 'none';
-        document.getElementById('done-screen').style.display = 'flex';
+    function switchTab(tabId, isPractice = false) {
+        practiceMode = isPractice;
+        document.querySelectorAll('.view-section, .nav-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`view-${tabId === 'stats' ? 'stats' : (tabId === 'article' ? 'article' : (tabId === 'library' ? 'library' : 'review'))}`).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if (tabId === 'stats') renderStats();
+        if (tabId === 'library') renderLibrary();
+        if (tabId === 'review') initDecks();
     }
 
-    // 強制再複習 5 個（無視時間）
-    function forceMoreCards() {
-        todaysDeck = [...allWords].sort(() => Math.random() - 0.5).slice(0, 5);
-        renderCard();
+    function renderStats() {
+        const counts = { easy: 0, good: 0, hard: 0, unseen: 0 };
+        allWords.forEach(w => {
+            const s = learningData[w.id]?.lastStatus || 'unseen';
+            counts[s]++;
+        });
+        const total = allWords.length;
+        const learned = total - counts.unseen;
+        const percent = total > 0 ? Math.round((learned / total) * 100) : 0;
+        
+        document.getElementById('ui-stat-percent').innerText = percent + "%";
+        document.getElementById('ui-stat-circle').style.background = `conic-gradient(var(--brand-color) ${percent}%, #333 ${percent}%)`;
+        document.getElementById('ui-stat-total').innerText = `已收錄 ${total} 個單字`;
+        ['easy','good','hard','unseen'].forEach(s => document.getElementById(`count-${s}`).innerText = counts[s]);
+        document.getElementById('ui-title').innerText = "學習統計";
     }
 
-    // --- 單字庫邏輯 ---
-    function renderWordList() {
-        const container = document.getElementById('list-content');
+    function renderLibrary() {
+        const container = document.getElementById('library-content');
         container.innerHTML = '';
-        const statusOrder = { 'hard': 0, 'good': 1, 'easy': 2, 'unseen': 3 };
-        const sorted = [...allWords].sort((a, b) => {
-            const statusA = learningData[a.id]?.lastStatus || 'unseen';
-            const statusB = learningData[b.id]?.lastStatus || 'unseen';
-            return statusOrder[statusA] - statusOrder[statusB];
-        });
-
-        sorted.forEach(w => {
+        allWords.sort((a,b) => (learningData[a.id]?.lastStatus || 'unseen') > (learningData[b.id]?.lastStatus || 'unseen') ? 1 : -1)
+        .forEach(w => {
             const status = learningData[w.id]?.lastStatus || 'unseen';
-            const item = document.createElement('div');
-            item.className = 'list-item';
-            item.style.backgroundColor = `var(--bg-${status})`;
-            item.innerHTML = `
-                <div>
-                    <span class="list-word">${w.w}</span>
-                    <span class="list-label" style="background: var(--${w.lvl.toLowerCase()}-color)">${w.lvl}</span>
-                    <div class="list-meaning">${w.m}</div>
-                </div>
-                <div style="font-size: 0.7rem; color: #999;">${status.toUpperCase()}</div>
-            `;
-            // 點擊單字直接進入卡片複習
-            item.onclick = () => { 
-                todaysDeck = [w]; 
-                switchTab('review');
-                renderCard();
-            };
-            container.appendChild(item);
+            container.innerHTML += `<div style="background:white; color:#1c1c1e; border-radius:12px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background-color:var(--bg-${status})" onclick="openWordModal('${w.id}')">
+                <div><b style="font-size:1.1rem">${w.w}</b> <span style="font-size:0.7rem; padding:2px 6px; border-radius:4px; color:white; background:var(--${w.lvl.toLowerCase()}-color)">${w.lvl}</span><div style="font-size:0.8rem; color:#666;">${w.m}</div></div>
+                <div style="font-size:0.6rem; color:#999;">${status.toUpperCase()}</div></div>`;
         });
+        document.getElementById('ui-title').innerText = "單字庫清單";
     }
 
-    // --- 短文邏輯 ---
     function renderArticles() {
         const container = document.getElementById('article-list');
         container.innerHTML = '';
         ARTICLE_DB.forEach(art => {
-            container.innerHTML += `
-                <div class="article-card">
-                    <h3 class="art-title">${art.title}</h3>
-                    <span class="art-meta">🎯 應用級別：${art.level}</span>
-                    <div class="art-jp">${art.content_jp}</div>
-                    <div class="art-tw">${art.content_tw}</div>
-                </div>
-            `;
+            container.innerHTML += `<div style="background:white; color:#1c1c1e; border-radius:20px; padding:25px; margin-bottom:20px; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
+                <h3 style="margin-top:0">${art.title}</h3><span style="font-size:0.7rem; color:var(--brand-color); font-weight:bold;">${art.level}</span>
+                <div style="font-size:1.2rem; line-height:2.2; margin:15px 0;">${art.content_jp}</div>
+                <div style="font-size:0.9rem; color:#555; border-top:1px dashed #ccc; padding-top:15px;">${art.content_tw}</div></div>`;
         });
     }
 
-    // --- 底部導覽切換 ---
-    function switchTab(tabId) {
-        document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        
-        document.getElementById(`view-${tabId}`).classList.add('active');
-        event.currentTarget.classList.add('active');
-
-        if (tabId === 'review') document.getElementById('ui-title').innerText = "每日任務";
-        if (tabId === 'article') document.getElementById('ui-title').innerText = "短文閱讀";
-        if (tabId === 'library') {
-            document.getElementById('ui-title').innerText = "單字庫";
-            renderWordList();
-        }
+    function openWordModal(wordId) {
+        const w = allWords.find(item => item.id === wordId);
+        if (!w) return;
+        const modal = document.getElementById('modal-overlay');
+        const card = document.getElementById('modal-card');
+        const color = `var(--${(w.lvl || 'other').toLowerCase()}-color)`;
+        card.innerHTML = `<div style="padding:30px; text-align:center;">
+            <div style="display:inline-block; padding:4px 10px; border-radius:6px; color:white; font-weight:800; font-size:0.7rem; background:${color}">${w.lvl}</div>
+            <h1 style="font-size:2.8rem; margin:15px 0 5px;">${w.w}</h1>
+            <p style="color:#8e8e93; margin-bottom:10px;">${w.k}</p>
+            <h2 style="color:var(--brand-color);">${w.m}</h2>
+            <div style="text-align:left; margin-top:20px; background:#f2f2f7; padding:15px; border-radius:15px;">
+                <div style="font-size:1rem; line-height:1.6; margin-bottom:8px;">${w.p_jp}</div>
+                <div style="font-size:0.8rem; color:#666;">${w.p_tw}</div>
+            </div>
+            <button onclick="closeModal()" style="margin-top:20px; width:100%; padding:12px; border-radius:10px; border:none; background:#333; color:white; font-weight:bold;">關閉</button>
+        </div>`;
+        modal.style.display = 'flex';
     }
 
-    function speakWord(e) {
-        e.stopPropagation();
-        const u = new SpeechSynthesisUtterance(document.getElementById('ui-word').innerText);
-        u.lang = 'ja-JP'; window.speechSynthesis.speak(u);
-    }
+    function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+    function showDone() { document.getElementById('card-area').style.display = 'none'; document.getElementById('done-screen').style.display = 'flex'; }
+    function speakWord(e) { e.stopPropagation(); const u = new SpeechSynthesisUtterance(document.getElementById('ui-word').innerText); u.lang = 'ja-JP'; window.speechSynthesis.speak(u); }
 
     window.onload = fetchData;
 </script>
