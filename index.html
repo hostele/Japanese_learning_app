@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v6.0 Library Pro</title>
+    <title>26 Words. v6.1 Library Pro</title>
     <style>
         :root { 
             --n3-color: #2ecc71; --n4-color: #3498db; --n5-color: #f39c12; --other-color: #9b59b6;
@@ -32,17 +32,21 @@
 
         /* 背面：大字體與比例調整 */
         .card-back { background-color: #fafafa; transform: rotateY(180deg); }
-        .word-main-area { flex: 1.5; display: flex; flex-direction: column; justify-content: center; border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
-        .ui-word { font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -1px; }
+        .word-main-area { position: relative; flex: 1.5; display: flex; flex-direction: column; justify-content: center; border-bottom: 1px solid #eee; margin-bottom: 20px; padding-bottom: 10px; }
+        .ui-word { font-size: 3rem; font-weight: 900; margin: 0; letter-spacing: -1px; width: 85%;}
         .ui-reading { font-size: 1.2rem; color: #8e8e93; margin: 8px 0; }
         .ui-meaning { font-size: 1.6rem; font-weight: 700; color: #2ecc71; margin: 0; }
+        
+        /* 修復喇叭圖示定位 */
+        .audio-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 2rem; cursor: pointer; opacity: 0.8; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
+        .audio-btn:active { transform: translateY(-50%) scale(0.9); }
 
         .example-area { flex: 1; overflow-y: auto; text-align: left; }
         .ex-jp { font-size: 1.1rem; line-height: 1.8; color: #1c1c1e; margin-bottom: 10px; }
         .ex-tw { font-size: 0.95rem; color: #666; border-left: 3px solid #eee; padding-left: 10px; }
 
         .btn-group { display: flex; gap: 8px; margin-top: 20px; }
-        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 700; padding: 16px 0; border: none; cursor: pointer; font-size: 0.9rem; }
+        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 700; padding: 16px 0; border: none; cursor: pointer; font-size: 0.9rem; -webkit-tap-highlight-color: transparent;}
         .btn-hard { background-color: #ffeaea; color: #e74c3c; }
         .btn-good { background-color: #f2f2f7; color: #555; }
         .btn-easy { background-color: #e2fbe2; color: #2ecc71; }
@@ -68,7 +72,7 @@
     <div class="top-bar">
         <span id="ui-counter">...</span>
         <span class="lib-btn" id="view-toggle" onclick="toggleView()">單字庫</span>
-        <span id="ui-status" style="color: #2ecc71;">● 雲端 v6.0</span>
+        <span id="ui-status" style="color: #2ecc71;">● 雲端 v6.1</span>
     </div>
 
     <div class="card-wrapper" id="card-area">
@@ -80,7 +84,7 @@
             <div class="card-face card-back">
                 <div class="level-badge" id="ui-level-back"></div>
                 <div class="word-main-area">
-                    <div style="position: absolute; right: 0; top: 40px; font-size: 1.8rem; cursor: pointer;" onclick="speakWord(event)">🔊</div>
+                    <div class="audio-btn" onclick="speakWord(event)">🔊</div>
                     <p class="ui-word" id="ui-word"></p>
                     <p class="ui-reading" id="ui-kana"></p>
                     <p class="ui-meaning" id="ui-meaning"></p>
@@ -112,27 +116,47 @@
 
 <script>
     // 【在這裡貼上你的 Google Sheets CSV 網址】
-    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pubhtml'; 
+    const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pub?output=csv'; 
 
     let allWords = [];
     let todaysDeck = [];
     let currentMode = 'study';
     let isAnimating = false;
-    const STORAGE_KEY = '26words_cloud_v6';
+    
+    // 更換一把新鑰匙，強制清除有問題的舊快取
+    const STORAGE_KEY = '26words_cloud_v6_1';
     let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
 
     async function fetchData() {
         try {
             const response = await fetch(SHEET_CSV_URL);
             const data = await response.text();
+            
+            // 防呆機制：如果抓到的資料是網頁標籤開頭，代表網址填錯了
+            if (data.trim().startsWith('<')) {
+                throw new Error("網址格式錯誤，抓到 HTML 而不是 CSV。請確認網址結尾是 pub?output=csv");
+            }
+
             const rows = data.split('\n').slice(1);
             allWords = rows.map(row => {
                 const regex = /,(?=(?:(?:[^"]*"){2})*[^"]*$)/;
                 const cols = row.split(regex).map(col => col.replace(/^"|"$/g, '').trim());
+                
+                // 防呆機制：如果這一行欄位不夠，就跳過它
+                if(cols.length < 8) return null; 
+                
                 return { id: cols[0], lvl: cols[1], theme: cols[2], w: cols[3], k: cols[4], r: cols[5], m: cols[6], p_jp: cols[7], p_tw: cols[8] };
-            }).filter(w => w.id);
+            }).filter(w => w !== null && w.id);
+
+            if (allWords.length === 0) throw new Error("資料庫是空的");
+
             initBatch();
-        } catch (e) { document.getElementById('ui-counter').innerText = "連線失敗"; }
+        } catch (e) { 
+            document.getElementById('ui-counter').innerText = "連線失敗"; 
+            document.getElementById('ui-status').innerText = "❌ 網址錯誤";
+            document.getElementById('ui-status').style.color = "#e74c3c";
+            console.error(e);
+        }
     }
 
     function initBatch() {
@@ -183,7 +207,6 @@
         const container = document.getElementById('list-content');
         container.innerHTML = '';
         
-        // 排序：困難 > 剛好 > 簡單 > 未學習
         const statusOrder = { 'hard': 0, 'good': 1, 'easy': 2, 'unseen': 3 };
         const sorted = [...allWords].sort((a, b) => {
             const statusA = learningData[a.id]?.lastStatus || 'unseen';
@@ -214,46 +237,4 @@
         if (isAnimating) return;
         isAnimating = true;
 
-        const cur = todaysDeck.shift();
-        let record = learningData[cur.id] || { interval: 0 };
-        const now = Date.now();
-        record.lastStatus = status; // 記錄本次選擇狀態
-
-        if (status === 'hard') {
-            record.interval = 0.5;
-            todaysDeck.push(cur); 
-        } else {
-            record.interval = (status === 'good') ? Math.max(1, (record.interval || 1) * 1.5) : Math.max(2, (record.interval || 1) * 2.5);
-            record.nextReview = now + (record.interval * 86400000);
-        }
-
-        learningData[cur.id] = record;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
-
-        const card = document.getElementById('flashcard');
-        card.style.animation = 'slideOutAnim 0.4s forwards';
-        setTimeout(() => {
-            if (todaysDeck.length > 0) {
-                renderCard();
-                card.style.animation = 'none'; void card.offsetWidth;
-                card.style.animation = 'slideInAnim 0.4s forwards';
-                setTimeout(() => { isAnimating = false; card.style.animation = ''; }, 400);
-            } else { showDone(); isAnimating = false; }
-        }, 400);
-    }
-
-    function showDone() {
-        document.getElementById('card-area').style.display = 'none';
-        document.getElementById('done-screen').style.display = 'flex';
-    }
-
-    function speakWord(e) {
-        e.stopPropagation();
-        const u = new SpeechSynthesisUtterance(todaysDeck[0].w);
-        u.lang = 'ja-JP'; window.speechSynthesis.speak(u);
-    }
-
-    window.onload = fetchData;
-</script>
-</body>
-</html>
+        const
