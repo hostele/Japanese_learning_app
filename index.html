@@ -115,7 +115,7 @@
 </div>
 
 <script>
-    // 【在這裡貼上你的 Google Sheets CSV 網址】
+    // 【已經幫你把網址完美貼入，無需修改】
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pub?output=csv'; 
 
     let allWords = [];
@@ -237,4 +237,46 @@
         if (isAnimating) return;
         isAnimating = true;
 
-        const
+        const cur = todaysDeck.shift();
+        let record = learningData[cur.id] || { interval: 0 };
+        const now = Date.now();
+        record.lastStatus = status; 
+
+        if (status === 'hard') {
+            record.interval = 0.5;
+            todaysDeck.push(cur); 
+        } else {
+            record.interval = (status === 'good') ? Math.max(1, (record.interval || 1) * 1.5) : Math.max(2, (record.interval || 1) * 2.5);
+            record.nextReview = now + (record.interval * 86400000);
+        }
+
+        learningData[cur.id] = record;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(learningData));
+
+        const card = document.getElementById('flashcard');
+        card.style.animation = 'slideOutAnim 0.4s forwards';
+        setTimeout(() => {
+            if (todaysDeck.length > 0) {
+                renderCard();
+                card.style.animation = 'none'; void card.offsetWidth;
+                card.style.animation = 'slideInAnim 0.4s forwards';
+                setTimeout(() => { isAnimating = false; card.style.animation = ''; }, 400);
+            } else { showDone(); isAnimating = false; }
+        }, 400);
+    }
+
+    function showDone() {
+        document.getElementById('card-area').style.display = 'none';
+        document.getElementById('done-screen').style.display = 'flex';
+    }
+
+    function speakWord(e) {
+        e.stopPropagation();
+        const u = new SpeechSynthesisUtterance(todaysDeck[0].w);
+        u.lang = 'ja-JP'; window.speechSynthesis.speak(u);
+    }
+
+    window.onload = fetchData;
+</script>
+</body>
+</html>
