@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>26 Words. v8.0 Master Edition</title>
+    <title>26 Words. v9.0 Master</title>
     <style>
         :root { 
             --n3-color: #2ecc71; --n4-color: #3498db; --n5-color: #f39c12; --other-color: #9b59b6;
@@ -30,27 +30,27 @@
         .passage-text { font-size: 1.6rem; line-height: 2.6; font-weight: 500; width: 100%; }
         ruby { ruby-align: center; }
         rt { font-size: 0.55em; color: #8e8e93; font-family: monospace; transform: translateY(-2px); }
-        .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.05); padding: 2px 4px; border-radius: 4px; border-bottom: 2px solid #e74c3c; cursor: help;}
+        .highlight { color: #e74c3c; font-weight: 700; background-color: rgba(231, 76, 60, 0.05); padding: 2px 4px; border-radius: 4px; border-bottom: 2px solid #e74c3c; cursor: pointer;}
         .highlight rt { color: #e74c3c; }
 
         .word-main-area { position: relative; border-bottom: 1px solid #eee; margin-bottom: 15px; padding-bottom: 10px; }
         .ui-word { font-size: 2.8rem; font-weight: 900; margin: 0; letter-spacing: -1px; }
         .ui-meaning { font-size: 1.5rem; font-weight: 700; color: var(--brand-color); margin: 5px 0; }
-        .audio-btn { position: absolute; right: 0; top: 10px; font-size: 2rem; cursor: pointer; opacity: 0.8; }
+        .audio-btn { position: absolute; right: 0; top: 10px; font-size: 2rem; cursor: pointer; opacity: 0.8; -webkit-tap-highlight-color: transparent;}
 
         .btn-group { display: flex; gap: 8px; margin-top: auto; }
-        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 700; padding: 16px 0; border: none; cursor: pointer; font-size: 0.9rem; }
+        .btn { flex: 1; text-align: center; border-radius: 12px; font-weight: 700; padding: 16px 0; border: none; cursor: pointer; font-size: 0.9rem; -webkit-tap-highlight-color: transparent;}
         .btn-hard { background-color: #ffeaea; color: #e74c3c; }
         .btn-good { background-color: #f2f2f7; color: #555; }
         .btn-easy { background-color: #e2fbe2; color: #2ecc71; }
 
-        /* 統計頁面 */
+        /* 統計頁面與計時器 */
         .stats-container { padding: 25px; }
         .stats-header { text-align: center; margin-bottom: 30px; }
         .progress-circle { width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(var(--brand-color) 0%, #333 0%); margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; position: relative; border: 8px solid #222; }
         .progress-inner { width: 120px; height: 120px; background: #121212; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .stat-card { background: #1c1c1e; padding: 15px; border-radius: 15px; border-left: 5px solid #333; }
+        .stat-card { background: #1c1c1e; padding: 15px; border-radius: 15px; border-left: 5px solid #333; display: flex; flex-direction: column; justify-content: center;}
         
         /* 導覽列 */
         .bottom-nav { position: absolute; bottom: 0; left: 0; width: 100%; height: 75px; background: var(--nav-bg); display: flex; border-top: 1px solid #333; z-index: 20;}
@@ -63,9 +63,9 @@
 
         /* 短文彈窗 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
-        .modal-card { width: 100%; max-width: 350px; background: white; border-radius: 25px; color: #1c1c1e; overflow: hidden; }
+        .modal-card { width: 100%; max-width: 350px; background: white; border-radius: 25px; color: #1c1c1e; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5);}
 
-        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
         @keyframes slideOutAnim { to { transform: translateY(-120%) rotateY(180deg) scale(0.9); opacity: 0; } }
         @keyframes slideInAnim { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
@@ -75,7 +75,8 @@
 <div class="app-container">
     <div class="top-bar">
         <span id="ui-title" style="font-weight: 900; letter-spacing: 1px;">PRACTICE</span>
-        <span id="ui-status" style="color: var(--brand-color);">● v8.0 Master</span>
+        <span id="ui-counter" style="color: #8e8e93; margin-left:10px; font-size:0.8rem;"></span>
+        <span id="ui-status" style="color: var(--brand-color); margin-left:auto;">● v9.0 Master</span>
     </div>
 
     <div class="content-area">
@@ -109,7 +110,7 @@
             <div id="done-screen" style="display:none; text-align:center; padding:40px; justify-content:center; height:100%; flex-direction:column;">
                 <div style="font-size:4rem;">🎊</div>
                 <h2>目前進度完成</h2>
-                <p style="color:#8e8e93;">太棒了！休息一下，或是去短文區看看吧。</p>
+                <p style="color:#8e8e93;">太棒了！去短文區看看有沒有新文章吧。</p>
             </div>
         </div>
 
@@ -133,10 +134,16 @@
                     <h2 id="ui-stat-total">已收錄 0 單字</h2>
                 </div>
                 <div class="stat-grid">
-                    <div class="stat-card" style="border-color: #2ecc71;">掌握中 (Easy)<br><b id="count-easy">0</b></div>
-                    <div class="stat-card" style="border-color: #8e8e93;">學習中 (Good)<br><b id="count-good">0</b></div>
-                    <div class="stat-card" style="border-color: #e74c3c;">複習中 (Hard)<br><b id="count-hard">0</b></div>
-                    <div class="stat-card" style="border-color: #f39c12;">未開始 (Unseen)<br><b id="count-unseen">0</b></div>
+                    <div class="stat-card" style="border-color: #3498db; grid-column: span 2; align-items:center; padding:20px;">
+                        <div style="font-size:0.85rem; color:#888;">今日學習時間</div>
+                        <div style="font-size:2.2rem; font-weight:900; color:#3498db; font-family:monospace;" id="ui-time-daily">00:00:00</div>
+                        <div style="font-size:0.8rem; color:#666; margin-top:10px;">總計停留時間</div>
+                        <div style="font-size:1.2rem; font-weight:bold; color:#aaa; font-family:monospace;" id="ui-time-total">00:00:00</div>
+                    </div>
+                    <div class="stat-card" style="border-color: #2ecc71;">掌握中 (Easy)<br><b id="count-easy" style="font-size:1.5rem">0</b></div>
+                    <div class="stat-card" style="border-color: #8e8e93;">學習中 (Good)<br><b id="count-good" style="font-size:1.5rem">0</b></div>
+                    <div class="stat-card" style="border-color: #e74c3c;">複習中 (Hard)<br><b id="count-hard" style="font-size:1.5rem">0</b></div>
+                    <div class="stat-card" style="border-color: #f39c12;">未開始 (Unseen)<br><b id="count-unseen" style="font-size:1.5rem">0</b></div>
                 </div>
             </div>
         </div>
@@ -145,7 +152,7 @@
     <div class="bottom-nav">
         <div class="nav-item" onclick="switchTab('article')"><div class="nav-icon">📖</div><div class="nav-text">短文</div></div>
         <div class="nav-item" onclick="switchTab('review')">
-            <div style="position:absolute; top:8px; right:20%; width:8px; height:8px; background:#e74c3c; border-radius:50%; display:none; animation:flash 1s infinite;" id="badge-review"></div>
+            <div style="position:absolute; top:8px; right:25%; width:8px; height:8px; background:#e74c3c; border-radius:50%; display:none; animation:flash 1s infinite;" id="badge-review"></div>
             <div class="nav-icon">🃏</div><div class="nav-text">複習</div>
         </div>
         <div class="nav-item active" onclick="switchTab('review', true)"><div class="nav-icon">🎯</div><div class="nav-text">練習</div></div>
@@ -155,29 +162,64 @@
 </div>
 
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
-    <div class="modal-card" id="modal-card" onclick="event.stopPropagation()">
-        </div>
+    <div class="modal-card" id="modal-card" onclick="event.stopPropagation()"></div>
 </div>
 
 <script>
     // 【貼上你的 Google Sheets CSV 網址】
     const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRCtaTM-Mdp0z0WycsCDEBxJj8UNyklUsWx61deU8im5xfPqabpH0YsyTXP7jC7PSJx4N6JOia5u0Nu/pub?output=csv'; 
 
-    let allWords = [];
-    let currentDeck = [];
-    let isAnimating = false;
-    let practiceMode = true; // 是否為練習新字模式
-    const STORAGE_KEY = '26words_cloud_v8';
-    let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-
+    // 💡 魔法黑科技：你現在只要貼「純文字」，程式會自動抓單字庫幫你標上拼音和點擊互動！
     const ARTICLE_DB = [
         {
             title: "Advantech PMの日常",
-            level: "N3-N4 職場應用",
-            content_jp: "研華(Advantech)の<ruby>担当者<rt>tantousha</rt></ruby>として、新しい<span class='highlight' onclick='openWordModal(\"w506\")'><ruby>計画<rt>keikaku</rt></ruby></span>を立てました。システムをさらに<span class='highlight' onclick='openWordModal(\"w513\")'><ruby>改善<rt>kaizen</rt></ruby></span>するために、会議の<span class='highlight' onclick='openWordModal(\"w507\")'><ruby>準備<rt>juunbi</rt></ruby></span>が必要です。お客様の<span class='highlight' onclick='openWordModal(\"w517\")'><ruby>期待<rt>kitai</rt></ruby></span>に応えるのは大変ですが、チームが大会で<span class='highlight' onclick='openWordModal(\"w515\")'><ruby>優勝<rt>yuushou</rt></ruby></span>したときのような喜びがあります。",
-            content_tw: "作為研華的負責人，制定了新的計畫。為了進一步改善系統，會議的準備是必要的。雖然回應客戶的期待很辛苦，但會有像團隊在比賽中獲得冠軍時那樣的喜悅。"
+            content: "研華の担当者として、新しい計画を立てます。システムを改善するために、会議の準備が必要です。顧客の期待に応えるのは大変ですが、チームが優勝したときのような喜びがあります。"
+        },
+        {
+            title: "週末の台南旅行",
+            content: "週末は台南の海へ行きました。旅行の準備は少し大変でしたが、美味しい料理の味を楽しんで、たくさん写真を撮りました。カフェで可愛い猫猫と遊んで、みんな笑顔になりました。本当にいい思い出です。"
+        },
+        {
+            title: "F1のスピード",
+            content: "マクラーレンの速度は本当に速いです。ノリス選手の技術に驚きました。最後まで諦めないで、一生懸命応援します。優勝を期待しています。"
+        },
+        {
+            title: "野球の試合",
+            content: "大谷選手のホームランを期待して、みんなで一生懸命応援しました。彼は本当に優秀な選手です。毎日の練習を継続することが大切です。"
+        },
+        {
+            title: "新しい生活",
+            content: "毎日早く起きて、朝ご飯を食べます。それから、電車に乗って会社へ行きます。仕事は忙しいですが、週末は友達と買い物に行ったり、映画を見たりして、楽しく過ごします。"
         }
+       
     ];
+
+    let allWords = [];
+    let currentDeck = [];
+    let isAnimating = false;
+    let practiceMode = true; 
+    const STORAGE_KEY = '26words_cloud_v9';
+    let learningData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+
+    // --- ⏳ 時間追蹤系統 ---
+    let timeData = JSON.parse(localStorage.getItem('26words_time')) || { total: 0, daily: 0, date: new Date().toDateString() };
+    if (timeData.date !== new Date().toDateString()) {
+        timeData.daily = 0; timeData.date = new Date().toDateString();
+    }
+    function formatTime(sec) {
+        const h = String(Math.floor(sec / 3600)).padStart(2, '0');
+        const m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+        const s = String(sec % 60).padStart(2, '0');
+        return `${h}:${m}:${s}`;
+    }
+    setInterval(() => {
+        timeData.total++; timeData.daily++;
+        if (timeData.total % 5 === 0) localStorage.setItem('26words_time', JSON.stringify(timeData));
+        if (document.getElementById('view-stats').classList.contains('active')) {
+            document.getElementById('ui-time-daily').innerText = formatTime(timeData.daily);
+            document.getElementById('ui-time-total').innerText = formatTime(timeData.total);
+        }
+    }, 1000);
 
     async function fetchData() {
         try {
@@ -195,23 +237,50 @@
         } catch (e) { document.getElementById('ui-title').innerText = "連線失敗"; }
     }
 
+    // 💡 自動解析短文的黑科技引擎
+    function parseArticle(text) {
+        let parsed = text;
+        // 依字數長度排序，避免短字搶先替換長字（例如先匹配「一生懸命」才匹配「一生」）
+        const sortedWords = [...allWords].sort((a, b) => b.w.length - a.w.length);
+        
+        // 第一階段：標記
+        sortedWords.forEach((w, i) => {
+            if (!w.w) return;
+            const marker = `{|{${i}}|}`;
+            const escapedWord = w.w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            parsed = parsed.replace(new RegExp(escapedWord, 'g'), marker);
+        });
+        // 第二階段：替換成帶拼音與按鈕的 HTML
+        sortedWords.forEach((w, i) => {
+            const marker = `{|{${i}}|}`;
+            const escapedMarker = marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const replacement = `<span class='highlight' onclick='openWordModal("${w.id}")'><ruby>${w.w}<rt>${w.r}</rt></ruby></span>`;
+            parsed = parsed.replace(new RegExp(escapedMarker, 'g'), replacement);
+        });
+        return parsed;
+    }
+
     function initDecks() {
         const now = Date.now();
-        // 複習邏輯：已學過 且 時間到了
         const dueWords = allWords.filter(w => learningData[w.id] && learningData[w.id].nextReview <= now);
         document.getElementById('badge-review').style.display = dueWords.length > 0 ? 'block' : 'none';
         
+        // 💡 解除限制：直接載入全部待學/待複習單字，不使用 slice
         if (practiceMode) {
-            // 練習邏輯：未學過 (unseen)
-            currentDeck = allWords.filter(w => !learningData[w.id]).slice(0, 10).sort(() => Math.random() - 0.5);
+            currentDeck = allWords.filter(w => !learningData[w.id]).sort(() => Math.random() - 0.5);
             document.getElementById('ui-title').innerText = "練習新單字";
         } else {
-            currentDeck = dueWords.slice(0, 10).sort(() => Math.random() - 0.5);
+            currentDeck = dueWords.sort(() => Math.random() - 0.5);
             document.getElementById('ui-title').innerText = "每日複習";
         }
 
+        updateCounter();
         if (currentDeck.length > 0) renderCard();
         else showDone();
+    }
+
+    function updateCounter() {
+        document.getElementById('ui-counter').innerText = currentDeck.length > 0 ? `剩餘 ${currentDeck.length}` : '';
     }
 
     function renderCard() {
@@ -239,7 +308,7 @@
         record.lastStatus = status;
 
         if (status === 'hard') {
-            record.interval = 0.5; record.nextReview = Date.now() + 43200000; // 12小時後
+            record.interval = 0.5; record.nextReview = Date.now() + 43200000; 
         } else {
             record.interval = (status === 'good') ? Math.max(1, (record.interval || 1) * 1.5) : Math.max(2, (record.interval || 1) * 2.5);
             record.nextReview = Date.now() + (record.interval * 86400000);
@@ -250,6 +319,7 @@
         const card = document.getElementById('flashcard');
         card.style.animation = 'slideOutAnim 0.4s forwards';
         setTimeout(() => {
+            updateCounter();
             if (currentDeck.length > 0) {
                 renderCard();
                 card.style.animation = 'none'; void card.offsetWidth;
@@ -264,9 +334,11 @@
         document.querySelectorAll('.view-section, .nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(`view-${tabId === 'stats' ? 'stats' : (tabId === 'article' ? 'article' : (tabId === 'library' ? 'library' : 'review'))}`).classList.add('active');
         event.currentTarget.classList.add('active');
+        
         if (tabId === 'stats') renderStats();
         if (tabId === 'library') renderLibrary();
         if (tabId === 'review') initDecks();
+        if (tabId === 'article') document.getElementById('ui-title').innerText = "情境短文";
     }
 
     function renderStats() {
@@ -284,13 +356,22 @@
         document.getElementById('ui-stat-total').innerText = `已收錄 ${total} 個單字`;
         ['easy','good','hard','unseen'].forEach(s => document.getElementById(`count-${s}`).innerText = counts[s]);
         document.getElementById('ui-title').innerText = "學習統計";
+        
+        document.getElementById('ui-time-daily').innerText = formatTime(timeData.daily);
+        document.getElementById('ui-time-total').innerText = formatTime(timeData.total);
     }
 
     function renderLibrary() {
         const container = document.getElementById('library-content');
         container.innerHTML = '';
-        allWords.sort((a,b) => (learningData[a.id]?.lastStatus || 'unseen') > (learningData[b.id]?.lastStatus || 'unseen') ? 1 : -1)
-        .forEach(w => {
+        // 💡 精確排序邏輯：困難(0) > 剛好(1) > 簡單(2) > 沒看過(3)
+        const statusOrder = { 'hard': 0, 'good': 1, 'easy': 2, 'unseen': 3 };
+        
+        [...allWords].sort((a,b) => {
+            const sA = learningData[a.id]?.lastStatus || 'unseen';
+            const sB = learningData[b.id]?.lastStatus || 'unseen';
+            return statusOrder[sA] - statusOrder[sB];
+        }).forEach(w => {
             const status = learningData[w.id]?.lastStatus || 'unseen';
             container.innerHTML += `<div style="background:white; color:#1c1c1e; border-radius:12px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; background-color:var(--bg-${status})" onclick="openWordModal('${w.id}')">
                 <div><b style="font-size:1.1rem">${w.w}</b> <span style="font-size:0.7rem; padding:2px 6px; border-radius:4px; color:white; background:var(--${w.lvl.toLowerCase()}-color)">${w.lvl}</span><div style="font-size:0.8rem; color:#666;">${w.m}</div></div>
@@ -303,10 +384,12 @@
         const container = document.getElementById('article-list');
         container.innerHTML = '';
         ARTICLE_DB.forEach(art => {
+            // 透過魔法引擎自動把純文字變成帶標籤的 HTML
+            const interactiveContent = parseArticle(art.content);
             container.innerHTML += `<div style="background:white; color:#1c1c1e; border-radius:20px; padding:25px; margin-bottom:20px; box-shadow:0 5px 15px rgba(0,0,0,0.3);">
-                <h3 style="margin-top:0">${art.title}</h3><span style="font-size:0.7rem; color:var(--brand-color); font-weight:bold;">${art.level}</span>
-                <div style="font-size:1.2rem; line-height:2.2; margin:15px 0;">${art.content_jp}</div>
-                <div style="font-size:0.9rem; color:#555; border-top:1px dashed #ccc; padding-top:15px;">${art.content_tw}</div></div>`;
+                <h3 style="margin-top:0; margin-bottom:15px;">${art.title}</h3>
+                <div style="font-size:1.25rem; line-height:2.4;">${interactiveContent}</div>
+            </div>`;
         });
     }
 
